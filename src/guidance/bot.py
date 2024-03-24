@@ -6,7 +6,17 @@ import pygame
 import tempfile
 import speech_recognition as sr
 from openai import OpenAI
-from config import OPENAI_API_KEY  # Make sure this points to your file containing the API key
+import json
+import os
+
+config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'config.json')
+
+# Read the config.json file
+with open(config_path, 'r') as f:
+    config = json.load(f)
+
+# Access the OPENAI_API_KEY
+OPENAI_API_KEY = config.get('OPENAI_API_KEY')
 
 def initialize_pygame_mixer():
     pygame.mixer.init()
