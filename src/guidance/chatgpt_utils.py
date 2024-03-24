@@ -1,14 +1,6 @@
 import os
 from openai import OpenAI
-import json
-
-config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'config.json')
-
-with open(config_path, 'r') as file:
-    config = json.load(file)
-
-# Extract the OPENAI_API_KEY value
-OPENAI_API_KEY = config.get('OPENAI_API_KEY')
+from config import OPENAI_API_KEY
 
 def get_greeting():
 
