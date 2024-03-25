@@ -81,10 +81,11 @@ def detect_motion_and_interact():
     print("Greeting:", greeting)
     play_speech(greeting)
 
-    current_frame = capture_frame(reader)
+    result, current_frame = cam.read() 
     motion_detected = False
 
     while True:
+        print("In da loop!")
         if motion_detected:
             print("Motion detected!")
             user_speech = listen_and_recognize()
@@ -96,7 +97,7 @@ def detect_motion_and_interact():
         
         time.sleep(1)
         last_frame = current_frame
-        current_frame = capture_frame(reader)
+        result, current_frame = cam.read() 
         motion_detected = detect_motion(last_frame, current_frame)
 
 
