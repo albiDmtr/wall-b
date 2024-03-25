@@ -70,10 +70,13 @@ def interact():
 
 
     while True:
+        print("Listening...")
         user_speech = listen_and_recognize()
         if user_speech:
             response = get_chatgpt_response(user_speech)
             play_speech(response)
+        else:
+            print("No speech detected.")
 
 def conversation_loop():
     user_speech = listen_and_recognize()
