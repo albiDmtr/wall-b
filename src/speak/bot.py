@@ -67,17 +67,29 @@ def recalibrate_baseline(cap, frames_to_skip=30):
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         gray = cv2.GaussianBlur(gray, (21, 21), 0)
     return gray        
-        
+
+def find_working_camera():
+    index = 0
+    num_of_cameras = 10  # Adjust this value based on your expectation
+    while index < num_of_cameras:
+        cap = cv2.VideoCapture(index)
+        if cap is None or not cap.isOpened():
+            print('Warning: unable to open video source: ', index)
+        else:
+            return cap
+        index += 1
+    return None
 
 def detect_motion_and_interact():
-    cap = cv2.VideoCapture(0)
+    cap = find_working_camera()
+    if cap is None:
+        raise Exception("No working camera found")  
     prev_gray = recalibrate_baseline(cap)
 
     motion_detected = False
 
     while True:
         _, frame = cap.read()
-        cv2.imshow('Frame', frame)
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         gray = cv2.GaussianBlur(gray, (21, 21), 0)
         diff = cv2.absdiff(prev_gray, gray)
