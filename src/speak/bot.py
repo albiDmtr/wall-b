@@ -88,10 +88,10 @@ def detect_motion_and_interact():
         print("In da loop!")
         if motion_detected:
             print("Motion detected!")
-            user_speech = listen_and_recognize()
+            '''user_speech = listen_and_recognize()
             if user_speech:
                 response = get_chatgpt_response(user_speech)
-                play_speech(response)
+                play_speech(response)'''
         else:
             print("No motion detected.")
         
