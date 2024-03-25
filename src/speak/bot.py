@@ -80,7 +80,7 @@ def detect_motion(frame1, frame2, threshold=50000):
     return motion_detected    
 
 def detect_motion_and_interact():
-    reader = imageio.get_reader('<video0>')
+    reader = imageio.get_reader('/dev/video1') #/dev/media3
     last_frame = capture_frame(reader)
 
     greeting = get_greeting()
