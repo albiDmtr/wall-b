@@ -1,13 +1,13 @@
 # importing OpenCV library 
 import sys
-from cv2 import *
+import cv2
   
 # initialize the camera 
 # If you have multiple camera connected with  
 # current device, assign a value in cam_port  
 # variable according to that 
 cam_port = int(sys.argv[1])
-cam = VideoCapture(cam_port) 
+cam = cv2.VideoCapture(cam_port) 
   
 # reading the input using the camera 
 result, image = cam.read() 
@@ -18,15 +18,15 @@ if result:
   
     # showing result, it take frame name and image  
     # output 
-    imshow("GeeksForGeeks", image) 
+    cv2.imshow("GeeksForGeeks", image) 
   
     # saving image in local storage 
-    imwrite("GeeksForGeeks.png", image) 
+    cv2.imwrite("GeeksForGeeks.png", image) 
   
     # If keyboard interrupt occurs, destroy image  
     # window 
-    waitKey(0) 
-    destroyWindow("GeeksForGeeks") 
+    cv2.waitKey(0) 
+    cv2.destroyWindow("GeeksForGeeks") 
   
 # If captured image is corrupted, moving to else part 
 else: 
