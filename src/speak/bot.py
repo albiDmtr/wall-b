@@ -73,13 +73,14 @@ def detect_motion(last_frame, current_frame):
     return False
 
 def detect_motion_and_interact():
+    print("started")
     cam_port = 0
     cam = cv2.VideoCapture(cam_port)
     result, last_frame = cam.read() 
 
-    greeting = get_greeting()
-    print("Greeting:", greeting)
-    play_speech(greeting)
+    #greeting = get_greeting()
+    #print("Greeting:", greeting)
+    #play_speech(greeting)
 
     result, current_frame = cam.read() 
     motion_detected = False
