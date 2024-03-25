@@ -84,6 +84,8 @@ def detect_motion_and_interact():
     cap = find_working_camera()
     if cap is None:
         raise Exception("No working camera found")  
+    else:
+        print("Found working camera")
     prev_gray = recalibrate_baseline(cap)
 
     motion_detected = False
