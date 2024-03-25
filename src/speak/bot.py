@@ -64,9 +64,11 @@ def get_chatgpt_response(text):
 
 def detect_motion(last_frame, current_frame):
     frame_diff = cv2.absdiff(last_frame, current_frame)
-    threshold_value = 30  # This is a parameter you might need to adjust
-    _, thresh = cv2.threshold(cv2.cvtColor(frame_diff, cv2.COLOR_BGR2GRAY), threshold_value, 255, cv2.THRESH_BINARY)
-    motion_detected = np.sum(thresh) > 0
+    difference_sum = np.sum(frame_diff, axis=2)
+    thresh_value = 25 * 3
+    _, thresh = cv2.threshold(difference_sum, thresh_value, 255, cv2.THRESH_BINARY)
+    motion_detected = np.count_nonzero(thresh)
+
     print("Mot det:")
     print(motion_detected)
     print("==========")
