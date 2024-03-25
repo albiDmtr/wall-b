@@ -77,6 +77,7 @@ def detect_motion_and_interact():
 
     while True:
         _, frame = cap.read()
+        cv2.imshow('Frame', frame)
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         gray = cv2.GaussianBlur(gray, (21, 21), 0)
         diff = cv2.absdiff(prev_gray, gray)
