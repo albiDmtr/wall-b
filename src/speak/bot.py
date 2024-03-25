@@ -1,4 +1,6 @@
-import cv2
+import imageio
+import numpy as np
+from PIL import Image
 import numpy as np
 from chatgpt_utils import get_greeting  # Make sure this points to your correct file
 from gtts import gTTS
@@ -8,6 +10,7 @@ import speech_recognition as sr
 from openai import OpenAI
 import json
 import os
+import time
 
 config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'config.json')
 
@@ -61,71 +64,47 @@ def get_chatgpt_response(text):
         print(f"Error: {e}")
         return "Ship product like a motherfucker"
         
-def recalibrate_baseline(cap, frames_to_skip=30):
-    for _ in range(frames_to_skip):
-        _, frame = cap.read()
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        gray = cv2.GaussianBlur(gray, (21, 21), 0)
-    return gray        
+def capture_frame(reader):
+    """Capture a frame from the video source and convert it to grayscale."""
+    frame = reader.get_next_data()  # Capture frame
+    frame = Image.fromarray(frame)  # Convert to PIL Image
+    frame = frame.convert('L')  # Convert to grayscale
+    return np.array(frame)  # Convert back to numpy array for analysis
 
-def find_working_camera():
-    index = 0
-    num_of_cameras = 10  # Adjust this value based on your expectation
-    while index < num_of_cameras:
-        cap = cv2.VideoCapture(index)
-        if cap is None or not cap.isOpened():
-            print('Warning: unable to open video source: ', index)
-        else:
-            return cap
-        index += 1
-    return None
+def detect_motion(frame1, frame2, threshold=50000):
+    """Detect motion by comparing two frames."""
+    # Compute the absolute difference between the two frames
+    diff = np.abs(frame1.astype("int") - frame2.astype("int"))
+    # Check if the sum of the absolute differences is greater than the threshold
+    motion_detected = np.sum(diff) > threshold
+    return motion_detected    
 
 def detect_motion_and_interact():
-    cap = find_working_camera()
-    if cap is None:
-        raise Exception("No working camera found")  
-    else:
-        print("Found working camera")
-    prev_gray = recalibrate_baseline(cap)
+    reader = imageio.get_reader('<video0>')
+    last_frame = capture_frame(reader)
 
+    greeting = get_greeting()
+    print("Greeting:", greeting)
+    play_speech(greeting)
+
+    current_frame = capture_frame(reader)
     motion_detected = False
 
     while True:
-        _, frame = cap.read()
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        gray = cv2.GaussianBlur(gray, (21, 21), 0)
-        diff = cv2.absdiff(prev_gray, gray)
-        _, thresh = cv2.threshold(diff, 25, 255, cv2.THRESH_BINARY)
-        thresh = cv2.dilate(thresh, None, iterations=2)
-        contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-        if not motion_detected:
-            for contour in contours:
-                if cv2.contourArea(contour) < 5000:  # Adjust this value as needed
-                    continue
-                print("Motion detected.")
-                motion_detected = True
-                greeting = get_greeting()
-                print("Greeting:", greeting)
-                play_speech(greeting)
-                break
-
         if motion_detected:
+            print("Motion detected!")
             user_speech = listen_and_recognize()
             if user_speech:
                 response = get_chatgpt_response(user_speech)
                 play_speech(response)
-            else:
-                # Recalibrate baseline frame to avoid immediate retriggering
-                print("Waiting for new motion...")
-                prev_gray = recalibrate_baseline(cap)
-                motion_detected = False
+        else:
+            print("No motion detected.")
+        
+        time.sleep(1)
+        last_frame = current_frame
+        current_frame = capture_frame(reader)
+        motion_detected = detect_motion(last_frame, current_frame)
 
-        if cv2.waitKey(10) == 27:
-            break
-
-    cap.release()
-    cv2.destroyAllWindows()
 
 def conversation_loop():
     user_speech = listen_and_recognize()
