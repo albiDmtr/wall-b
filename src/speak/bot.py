@@ -1,6 +1,4 @@
-import imageio
-import numpy as np
-from PIL import Image
+import cv2
 import numpy as np
 from chatgpt_utils import get_greeting  # Make sure this points to your correct file
 from gtts import gTTS
@@ -63,25 +61,21 @@ def get_chatgpt_response(text):
     except Exception as e:
         print(f"Error: {e}")
         return "Ship product like a motherfucker"
-        
-def capture_frame(reader):
-    """Capture a frame from the video source and convert it to grayscale."""
-    frame = reader.get_next_data()  # Capture frame
-    frame = Image.fromarray(frame)  # Convert to PIL Image
-    frame = frame.convert('L')  # Convert to grayscale
-    return np.array(frame)  # Convert back to numpy array for analysis
 
-def detect_motion(frame1, frame2, threshold=50000):
-    """Detect motion by comparing two frames."""
-    # Compute the absolute difference between the two frames
-    diff = np.abs(frame1.astype("int") - frame2.astype("int"))
-    # Check if the sum of the absolute differences is greater than the threshold
-    motion_detected = np.sum(diff) > threshold
-    return motion_detected    
+def detect_motion(last_frame, current_frame):
+    frame_diff = cv2.absdiff(last_frame, current_frame)
+    threshold_value = 30  # This is a parameter you might need to adjust
+    _, thresh = cv2.threshold(cv2.cvtColor(frame_diff, cv2.COLOR_BGR2GRAY), threshold_value, 255, cv2.THRESH_BINARY)
+    motion_detected = np.sum(thresh) > 0
+    print("Mot det:")
+    print(motion_detected)
+    print("==========")
+    return False
 
 def detect_motion_and_interact():
-    reader = imageio.get_reader('/dev/video1') #/dev/media3
-    last_frame = capture_frame(reader)
+    cam_port = 0
+    cam = cv2.VideoCapture(cam_port)
+    result, last_frame = cam.read() 
 
     greeting = get_greeting()
     print("Greeting:", greeting)
