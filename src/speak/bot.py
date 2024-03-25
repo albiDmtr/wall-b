@@ -1,4 +1,3 @@
-import cv2
 import numpy as np
 from chatgpt_utils import get_greeting  # Make sure this points to your correct file
 from gtts import gTTS
@@ -62,47 +61,19 @@ def get_chatgpt_response(text):
         print(f"Error: {e}")
         return "Ship product like a motherfucker"
 
-def detect_motion(last_frame, current_frame):
-    frame_diff = cv2.absdiff(last_frame, current_frame)
-    difference_sum = np.sum(frame_diff, axis=2)
-    thresh_value = 25 * 3
-    _, thresh = cv2.threshold(difference_sum, thresh_value, 255, cv2.THRESH_BINARY)
-    motion_detected = np.count_nonzero(thresh)
+def interact():
+    print("Robot started")
 
-    print("Mot det:")
-    print(motion_detected)
-    print("==========")
-    return False
+    greeting = get_greeting()
+    print("Greeting:", greeting)
+    play_speech(greeting)
 
-def detect_motion_and_interact():
-    print("started")
-    cam_port = 0
-    cam = cv2.VideoCapture(cam_port)
-    result, last_frame = cam.read() 
-
-    #greeting = get_greeting()
-    #print("Greeting:", greeting)
-    #play_speech(greeting)
-
-    result, current_frame = cam.read() 
-    motion_detected = False
 
     while True:
-        print("In da loop!")
-        if motion_detected:
-            print("Motion detected!")
-            '''user_speech = listen_and_recognize()
-            if user_speech:
-                response = get_chatgpt_response(user_speech)
-                play_speech(response)'''
-        else:
-            print("No motion detected.")
-        
-        time.sleep(1)
-        last_frame = current_frame
-        result, current_frame = cam.read() 
-        motion_detected = detect_motion(last_frame, current_frame)
-
+        user_speech = listen_and_recognize()
+        if user_speech:
+            response = get_chatgpt_response(user_speech)
+            play_speech(response)
 
 def conversation_loop():
     user_speech = listen_and_recognize()
@@ -113,4 +84,4 @@ def conversation_loop():
 
 if __name__ == "__main__":
     initialize_pygame_mixer()
-    detect_motion_and_interact()
+    interact()
