@@ -66,4 +66,3 @@ except KeyboardInterrupt:
     print("Program stopped")
 finally:
     GPIO.cleanup()  # Clean up GPIO on CTRL+C exit
-
