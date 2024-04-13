@@ -1,28 +1,20 @@
 import cv2
+import time
 
-# Capture video from the first USB webcam detected
-cap = cv2.VideoCapture(1)
+# Loop through potential device indices
+for index in range(0, 10):  # Adjust range if you have more devices
+    cap = cv2.VideoCapture(index)
+    if not cap.isOpened():
+        print(f"Cannot open camera at index {index}")
+    else:
+        print(f"Trying camera at index {index}")
+        ret, frame = cap.read()
+        if not ret:
+            print(f"Can't receive frame from index {index}")
+        else:
+            cv2.imshow('Webcam Live', frame)
+            cv2.waitKey(5000)  # Shows the frame for 5000 ms (5 seconds)
+            cv2.destroyAllWindows()
 
-if not cap.isOpened():
-    print("Cannot open camera")
-    exit()
-
-while True:
-    # Capture frame-by-frame
-    ret, frame = cap.read()
-
-    # If frame is read correctly ret is True
-    if not ret:
-        print("Can't receive frame (stream end?). Exiting ...")
-        break
-
-    # Display the resulting frame
-    cv2.imshow('Webcam Live', frame)
-
-    # Press 'q' to quit the window
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-
-# When everything done, release the capture
-cap.release()
-cv2.destroyAllWindows()
+        cap.release()
+        time.sleep(1)  # Wait a bit before trying the next index
