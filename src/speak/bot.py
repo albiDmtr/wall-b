@@ -33,8 +33,10 @@ def play_speech(text):
 
 def listen_and_recognize():
     r = sr.Recognizer()
-    with sr.Microphone() as source:
+    device_index = 1  # Jabra SPEAK 510 USB
+    with sr.Microphone(device_index=device_index) as source:
         print("Listening for speech...")
+        r.adjust_for_ambient_noise(source)  # this line is optional, to improve recognition accuracy
         audio = r.listen(source, timeout=5, phrase_time_limit=8)
     try:
         text = r.recognize_google(audio)
