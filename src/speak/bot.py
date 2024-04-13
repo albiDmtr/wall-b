@@ -70,7 +70,6 @@ def interact():
     print("Greeting:", greeting)
     play_speech(greeting)
 
-
     while True:
         print("Listening...")
         user_speech = listen_and_recognize()
