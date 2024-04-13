@@ -9,11 +9,11 @@ GPIO.setup(left_wheel_pin, GPIO.OUT)
 GPIO.setup(right_wheel_pin, GPIO.OUT)
 time.sleep(1)  # Sleep for 1 second
 
+GPIO.output(left_wheel_pin, True)
 while True:
     # circle
 
     # left turn
-    GPIO.output(left_wheel_pin, True)
     time.sleep(0.5)
 
     # straight
