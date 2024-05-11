@@ -1,4 +1,4 @@
-from pynput.keyboard import Key, Listener
+from evdev import InputDevice, categorize, ecodes
 import RPi.GPIO as GPIO
 
 # GPIO setup
@@ -8,32 +8,30 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(left_wheel_pin, GPIO.OUT, initial=GPIO.HIGH)
 GPIO.setup(right_wheel_pin, GPIO.OUT, initial=GPIO.HIGH)
 
-def on_press(key):
-    try:
-        if key == Key.right:
-            GPIO.output(left_wheel_pin, GPIO.LOW)
-            print("Left wheel is ON")
-        elif key == Key.left:
-            GPIO.output(right_wheel_pin, GPIO.LOW)
-            print("Right wheel is ON")
-        elif key == Key.up:
-            GPIO.output(left_wheel_pin, GPIO.LOW)
-            GPIO.output(right_wheel_pin, GPIO.LOW)
-            print("Both wheels are ON")
-    except AttributeError:
-        pass
+# Specify the device path for the keyboard (find it using `ls /dev/input/by-id/`)
+keyboard = InputDevice('/dev/input/event2')  # Adjust event number as necessary
 
-def on_release(key):
-    if key in [Key.right, Key.left, Key.up]:
-        GPIO.output(left_wheel_pin, GPIO.HIGH)
-        GPIO.output(right_wheel_pin, GPIO.HIGH)
-        print("Wheels are OFF")
-    if key == Key.esc:  # Press escape to stop the listener
-        return False
+def handle_key_press(key_event):
+    if key_event.type == ecodes.EV_KEY:
+        key_event = categorize(key_event)
+        if key_event.keystate == key_event.key_down:
+            if key_event.keycode == 'KEY_RIGHT':
+                GPIO.output(left_wheel_pin, GPIO.LOW)
+                print("Left wheel is ON")
+            elif key_event.keycode == 'KEY_LEFT':
+                GPIO.output(right_wheel_pin, GPIO.LOW)
+                print("Right wheel is ON")
+            elif key_event.keycode == 'KEY_UP':
+                GPIO.output(left_wheel_pin, GPIO.LOW)
+                GPIO.output(right_wheel_pin, GPIO.LOW)
+                print("Both wheels are ON")
+        elif key_event.keystate == key_event.key_up:
+            if key_event.keycode in ['KEY_RIGHT', 'KEY_LEFT', 'KEY_UP']:
+                GPIO.output(left_wheel_pin, GPIO.HIGH)
+                GPIO.output(right_wheel_pin, GPIO.HIGH)
+                print("Wheels are OFF")
 
-# Collect events until released
-with Listener(on_press=on_press, on_release=on_release) as listener:
-    listener.join()
+for event in keyboard.read_loop():
+    handle_key_press(event)
 
 GPIO.cleanup()  # Clean up GPIO on closing
-
