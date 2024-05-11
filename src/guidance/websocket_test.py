@@ -2,7 +2,7 @@ from evdev import InputDevice, categorize, ecodes
 import RPi.GPIO as GPIO
 import subprocess
 import time
-from chatgpt_utils.py import get_greeting
+from chatgpt_fetch import get_greeting
 
 # GPIO setup
 left_wheel_pin = 17
