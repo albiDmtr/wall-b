@@ -9,7 +9,7 @@ GPIO.setup(left_wheel_pin, GPIO.OUT, initial=GPIO.HIGH)
 GPIO.setup(right_wheel_pin, GPIO.OUT, initial=GPIO.HIGH)
 
 # Specify the device path for the keyboard (find it using `ls /dev/input/by-id/`)
-keyboard = InputDevice('/dev/input/event3')  # Adjust event number as necessary
+keyboard = InputDevice('/dev/input/event2')  # Adjust event number as necessary
 
 def handle_key_press(key_event):
     if key_event.type == ecodes.EV_KEY:
