@@ -1,8 +1,5 @@
 from evdev import InputDevice, categorize, ecodes
 import RPi.GPIO as GPIO
-import subprocess
-import time
-from chatgpt_fetch import get_greeting
 
 # GPIO setup
 left_wheel_pin = 17
@@ -36,18 +33,3 @@ def handle_key_press(key_event):
 
 for event in keyboard.read_loop():
     handle_key_press(event)
-
-def speak_text(text):
-    """Uses espeak to convert text to speech with an Indian accent."""
-    print(f"Speaking: {text}")  # Print what will be spoken
-    # Specify the voice for Indian English accent
-    subprocess.run(['espeak', '-v', 'en+f4', text])
-
-def continuously_speak():
-    while True:
-        greeting_text = get_greeting()
-        speak_text(greeting_text)
-        time.sleep(7)  # Wait for 7 seconds before the next call
-
-# Start the continuous speaking process
-continuously_speak()
