@@ -17,11 +17,11 @@ while running:
             running = False
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RIGHT:  # Right arrow key
-                GPIO.output(left_wheel_pin, True)  # Turn on the left wheel
+                GPIO.output(left_wheel_pin, False)  # Turn on the left wheel
                 print("Left wheel is ON")
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_RIGHT:  # Right arrow key released
-                GPIO.output(left_wheel_pin, False)  # Turn off the left wheel
+                GPIO.output(left_wheel_pin, True)  # Turn off the left wheel
                 print("Left wheel is OFF")
 
 pygame.quit()
