@@ -21,10 +21,10 @@ while running:
             running = False
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RIGHT:
-                GPIO.output(left_wheel_pin, GPIO.LOW)
+                GPIO.output(right_wheel_pin, GPIO.LOW)
                 print("Left wheel is ON")
             elif event.key == pygame.K_LEFT:
-                GPIO.output(right_wheel_pin, GPIO.LOW)
+                GPIO.output(left_wheel_pin, GPIO.LOW)
                 print("Right wheel is ON")
             elif event.key == pygame.K_UP:
                 GPIO.output(left_wheel_pin, GPIO.LOW)
