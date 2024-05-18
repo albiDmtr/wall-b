@@ -1,7 +1,6 @@
 import os
 from openai import OpenAI
 import json
-import os
 
 config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'config.json')
 
