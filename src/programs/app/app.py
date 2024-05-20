@@ -4,11 +4,17 @@ from elevenlabs import play
 from elevenlabs.client import ElevenLabs
 import speech_recognition as sr
 import os
+import json
 
 app = Flask(__name__)
 
-OPENAI_API_KEY = ''
-ELEVENLABS_API_KEY = ''
+config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'config.json')
+
+with open(config_path, 'r') as f:
+    config = json.load(f)
+
+OPENAI_API_KEY = config.get('OPENAI_API_KEY')
+ELEVENLABS_API_KEY = config.get('ELEVENLABS_API_KEY')
 ELEVENLABS_VOICE_ID_1 = 'lxNNOU4CuwcLA6DP9pL4'
 ELEVENLABS_VOICE_ID_2 = 'dfry7bk7VysVw6GgZmvx'
 
