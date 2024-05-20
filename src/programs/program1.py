@@ -91,7 +91,7 @@ def respond_to_speech(text2):
         chat_completion2 = openai_client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "The assistant is helpful, extremely sarcastic, and engages in conversation about Build It hackathons that are hosted every 2 to 3 weeks at Startup Sauna. Your answer is max 10 words."},
+                {"role": "system", "content": "The assistant is helpful, extremely sarcastic, and engages in conversation about Build It hackathons that are hosted every 2 to 3 weeks at Startup Sauna. Generate only 2 sentences or less."},
                 {"role": "user", "content": text2}
             ]
         )
@@ -120,10 +120,10 @@ def handle_key_press(key_event):
             elif key_event.keycode == 'KEY_ESC':
                 print("Program stopped")
                 exit(0)
-            elif key_event.keycode == 'KEY_RIGHT':
+            elif key_event.keycode == 'KEY_LEFT':
                 GPIO.output(right_wheel_pin, GPIO.LOW)
                 print("Left wheel is ON")
-            elif key_event.keycode == 'KEY_LEFT':
+            elif key_event.keycode == 'KEY_RIGHT':
                 GPIO.output(left_wheel_pin, GPIO.LOW)
                 print("Right wheel is ON")
             elif key_event.keycode == 'KEY_UP':
