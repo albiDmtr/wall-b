@@ -134,7 +134,7 @@ def handle_key_press(key_event):
                 print("Both wheels are ON")    
 
 def main():
-    keyboard = InputDevice('/dev/input/event4')
+    keyboard = InputDevice('/dev/input/event0')
 
     print(f"Listening on {keyboard}")
     try:
