@@ -1,7 +1,7 @@
 #GPIO can be only used with Raspberry Pi
 
 from evdev import InputDevice, categorize, ecodes
-#import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 from openai import OpenAI
 from evdev import InputDevice, categorize, ecodes
 from elevenlabs import play
@@ -11,12 +11,11 @@ import time
 import os
 import json
 
-# GPIO setup
-#left_wheel_pin = 17
-#right_wheel_pin = 22
-#GPIO.setmode(GPIO.BCM)
-#GPIO.setup(left_wheel_pin, GPIO.OUT, initial=GPIO.HIGH)
-#GPIO.setup(right_wheel_pin, GPIO.OUT, initial=GPIO.HIGH)
+left_wheel_pin = 17
+right_wheel_pin = 22
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(left_wheel_pin, GPIO.OUT, initial=GPIO.HIGH)
+GPIO.setup(right_wheel_pin, GPIO.OUT, initial=GPIO.HIGH)
 
 config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'config.json')
 
@@ -65,36 +64,35 @@ def play_audio(text, voice_id):
         print(f"An error occurred during audio generation or playback: {e}")
 
 def listen_to_speech(recognizer, microphone):
-    #with microphone as source:
-    #    print("Listening for speech...")
-    #    audio = recognizer.listen(source)
-    #try:
-    #    text = recognizer.recognize_google(audio)
-    #    print(f"Recognized speech: {text}")
-    #    return text
-    #except sr.UnknownValueError:
-    #    print("Speech recognition could not understand audio")
-    #    return None
-    #except sr.RequestError as e:
-    #    print(f"Could not request results from Google Speech Recognition service; {e}")
-    #    return None
-    #change text2 to respond_to_speech
+    with microphone as source:
+        print("Listening for speech...")
+        audio = recognizer.listen(source)
+    try:
+        text2 = recognizer.recognize_google(audio)
+        print(f"Recognized speech: {text2}")
+        return text2
+    except sr.UnknownValueError:
+        print("Speech recognition could not understand audio")
+        return None
+    except sr.RequestError as e:
+        print(f"Could not request results from Google Speech Recognition service; {e}")
+        return None
    
     # Simulate recognized speech for testing
-    print("Simulating speech recognition...")
-    time.sleep(2)  # Simulate delay for speech recognition
-    simulated_text = "Tell me more about the Build It hackathon."
-    print(f"Recognized speech: {simulated_text}")
-    return simulated_text
+    #print("Simulating speech recognition...")
+    #time.sleep(2)  # Simulate delay for speech recognition
+    #simulated_text = "Tell me more about the Build It hackathon."
+    #print(f"Recognized speech: {simulated_text}")
+    #return simulated_text
 
 
-def respond_to_speech(simulated_text):
+def respond_to_speech(text2):
     try:
         chat_completion2 = openai_client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "The assistant is helpful, extremely sarcastic, and engages in conversation about Build It hackathons that are hosted every 2 to 3 weeks at Startup Sauna. Your answer is max 10 words."},
-                {"role": "user", "content": simulated_text}
+                {"role": "user", "content": text2}
             ]
         )
         response = chat_completion2.choices[0].message.content.strip()
@@ -123,14 +121,14 @@ def handle_key_press(key_event):
                 print("Program stopped")
                 exit(0)
             elif key_event.keycode == 'KEY_RIGHT':
-                #GPIO.output(right_wheel_pin, GPIO.LOW)
+                GPIO.output(right_wheel_pin, GPIO.LOW)
                 print("Left wheel is ON")
             elif key_event.keycode == 'KEY_LEFT':
-                #GPIO.output(left_wheel_pin, GPIO.LOW)
+                GPIO.output(left_wheel_pin, GPIO.LOW)
                 print("Right wheel is ON")
             elif key_event.keycode == 'KEY_UP':
-                #GPIO.output(left_wheel_pin, GPIO.LOW)
-                #GPIO.output(right_wheel_pin, GPIO.LOW)
+                GPIO.output(left_wheel_pin, GPIO.LOW)
+                GPIO.output(right_wheel_pin, GPIO.LOW)
                 print("Both wheels are ON")    
 
 def main():
