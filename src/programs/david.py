@@ -1,10 +1,18 @@
 import time
 from elevenlabs import play
 from elevenlabs.client import ElevenLabs
+import json
+import os
 
-# Set your ElevenLabs API key and voice ID directly in the script
-ELEVENLABS_API_KEY = ''
-ELEVENLABS_VOICE_ID = ''
+config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'config.json')
+
+with open(config_path, 'r') as f:
+    config = json.load(f)
+
+OPENAI_API_KEY = config.get('OPENAI_API_KEY')
+ELEVENLABS_API_KEY = config.get('ELEVENLABS_API_KEY')
+
+ELEVENLABS_VOICE_ID = 'pBrWnpHeNZkkZM3nNMSi'
 
 # Initialize the ElevenLabs client
 client = ElevenLabs(api_key=ELEVENLABS_API_KEY)
