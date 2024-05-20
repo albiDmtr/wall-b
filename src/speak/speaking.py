@@ -16,3 +16,6 @@ def continuously_speak():
 
 # Start the continuous speaking process
 continuously_speak()
+
+#openai bot with memory:
+#https://www.youtube.com/watch?v=cHjlperESbg
