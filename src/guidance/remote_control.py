@@ -18,7 +18,7 @@ def handle_key_press(key_event):
             if key_event.keycode == 'KEY_LEFT':
                 GPIO.output(right_wheel_pin, GPIO.LOW)
                 print("Left wheel is ON")
-            elif key_event.keycode == 'KEY_RiGHT':
+            elif key_event.keycode == 'KEY_RIGHT':
                 GPIO.output(left_wheel_pin, GPIO.LOW)
                 print("Right wheel is ON")
             elif key_event.keycode == 'KEY_UP':
