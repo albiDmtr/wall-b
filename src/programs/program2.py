@@ -29,6 +29,7 @@ microphone = sr.Microphone()
 conversation_active = False
 current_voice_id = None
 stop_listening = threading.Event()
+listening_thread = None
 lock = threading.Lock()
 
 def get_greeting():
@@ -58,7 +59,7 @@ def play_audio(text, voice_id):
         print(f"An error occurred during audio generation or playback: {e}")
 
 def listen_to_speech():
-    global conversation_active
+    global conversation_active, listening_thread
     while conversation_active:
         with lock:  # Ensure no other thread can access the microphone
             with microphone as source:
@@ -80,6 +81,10 @@ def listen_to_speech():
         finally:
             if not stop_listening.is_set():
                 print("Continuing to listen...")
+                # Restart the thread to continue listening
+                listening_thread = threading.Thread(target=listen_to_speech)
+                listening_thread.start()
+                break
             else:
                 conversation_active = False
                 stop_listening.clear()
@@ -100,7 +105,7 @@ def respond_to_speech(text):
         return "Sorry, I couldn't understand that."
 
 def handle_key_press(key_event):
-    global conversation_active, current_voice_id, stop_listening
+    global conversation_active, current_voice_id, stop_listening, listening_thread
     if key_event.type == ecodes.EV_KEY:
         key_event = categorize(key_event)
         if key_event.keystate == key_event.key_down:
@@ -117,11 +122,17 @@ def handle_key_press(key_event):
                     current_voice_id = ELEVENLABS_VOICE_ID_2
                 play_audio(greeting, current_voice_id)
                 conversation_active = True
-                threading.Thread(target=listen_to_speech).start()
+                if listening_thread and listening_thread.is_alive():
+                    stop_listening.set()
+                    listening_thread.join()
+                listening_thread = threading.Thread(target=listen_to_speech)
+                listening_thread.start()
             elif key_event.keycode == 'KEY_ESC':
                 print("Program stopped")
                 conversation_active = False
                 stop_listening.set()
+                if listening_thread and listening_thread.is_alive():
+                    listening_thread.join()
                 exit(0)
 
 def main():
