@@ -58,29 +58,25 @@ def play_audio(text, voice_id):
 
 def listen_to_speech():
     global conversation_active
-    while conversation_active:
-        with lock:  # Ensure no other thread can access the microphone
-            with microphone as source:
-                print("Listening for speech...")
-                recognizer.adjust_for_ambient_noise(source)
-                print("Adjusting for ambient noise")
-                audio = recognizer.listen(source)
-                print("Created audio = recognizer.listen(source)")
-        try:
-            text = recognizer.recognize_google(audio)
-            print(f"Recognized speech: {text}")
-            if len(text.split()) >= 3:  # Check if the recognized speech has at least 3 words
-                response = respond_to_speech(text)
-                play_audio(response, current_voice_id)
-        except sr.UnknownValueError:
-            print("Speech recognition could not understand audio")
-        except sr.RequestError as e:
-            print(f"Could not request results from Google Speech Recognition service; {e}")
-        finally:
-            if not stop_listening.is_set():
-                continue
-            conversation_active = False
-            stop_listening.clear()
+    with lock:  # Ensure no other thread can access the microphone
+        with microphone as source:
+            print("Listening for speech...")
+            recognizer.adjust_for_ambient_noise(source)
+            print("Adjusting for ambient noise")
+            audio = recognizer.listen(source)
+            print("Created audio = recognizer.listen(source)")
+    try:
+        text = recognizer.recognize_google(audio)
+        print(f"Recognized speech: {text}")
+        response = respond_to_speech(text)
+        play_audio(response, current_voice_id)
+    except sr.UnknownValueError:
+        print("Speech recognition could not understand audio")
+    except sr.RequestError as e:
+        print(f"Could not request results from Google Speech Recognition service; {e}")
+    finally:
+        conversation_active = False
+        stop_listening.clear()
 
 def respond_to_speech(text):
     try:
