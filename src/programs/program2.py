@@ -83,7 +83,7 @@ def listen_to_speech():
                 stop_listening.clear()
             else:
                 print("Continuing to listen...")
-                
+
 def respond_to_speech(text):
     try:
         chat_completion = openai_client.chat.completions.create(
