@@ -2,11 +2,8 @@ from evdev import InputDevice, categorize, ecodes
 from openai import OpenAI
 from elevenlabs import play
 from elevenlabs.client import ElevenLabs
-import speech_recognition as sr
-import time
 import os
 import json
-import threading
 
 config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'config.json')
 
@@ -21,14 +18,6 @@ ELEVENLABS_VOICE_ID_2 = 'dfry7bk7VysVw6GgZmvx'
 # Initialize the OpenAI and ElevenLabs clients
 openai_client = OpenAI(api_key=OPENAI_API_KEY)
 elevenlabs_client = ElevenLabs(api_key=ELEVENLABS_API_KEY)
-
-recognizer = sr.Recognizer()
-microphone = sr.Microphone()
-
-conversation_active = False
-current_voice_id = None
-stop_listening = threading.Event()
-lock = threading.Lock()
 
 def get_greeting():
     try:
@@ -56,52 +45,12 @@ def play_audio(text, voice_id):
     except Exception as e:
         print(f"An error occurred during audio generation or playback: {e}")
 
-def listen_to_speech():
-    global conversation_active
-    with lock:  # Ensure no other thread can access the microphone
-        with microphone as source:
-            print("Listening for speech...")
-            recognizer.adjust_for_ambient_noise(source)
-            print("Adjusting for ambient noise")
-            audio = recognizer.listen(source)
-            print("Created audio = recognizer.listen(source)")
-    try:
-        text = recognizer.recognize_google(audio)
-        print(f"Recognized speech: {text}")
-        response = respond_to_speech(text)
-        play_audio(response, current_voice_id)
-    except sr.UnknownValueError:
-        print("Speech recognition could not understand audio")
-    except sr.RequestError as e:
-        print(f"Could not request results from Google Speech Recognition service; {e}")
-    finally:
-        conversation_active = False
-        stop_listening.clear()
-
-def respond_to_speech(text):
-    try:
-        chat_completion = openai_client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "The assistant is helpful, extremely sarcastic, and engages in conversation about Build It hackathons that are hosted every 2 to 3 weeks at Startup Sauna. Generate only 2 sentences or less."},
-                {"role": "user", "content": text}
-            ]
-        )
-        response = chat_completion.choices[0].message.content.strip()
-        return response
-    except Exception as e:
-        print(f"Error responding to speech with ChatGPT: {e}")
-        return "Sorry, I couldn't understand that."
-
 def handle_key_press(key_event):
-    global conversation_active, current_voice_id, stop_listening
+    global current_voice_id
     if key_event.type == ecodes.EV_KEY:
         key_event = categorize(key_event)
         if key_event.keystate == key_event.key_down:
             if key_event.keycode in ['KEY_A', 'KEY_S']:
-                if stop_listening.is_set():
-                    stop_listening.clear()
-                conversation_active = False  # Reset conversation
                 greeting = get_greeting()
                 print(f"Greeting generated: {greeting}")
                 if key_event.keycode == 'KEY_A':
@@ -109,8 +58,6 @@ def handle_key_press(key_event):
                 else:
                     current_voice_id = ELEVENLABS_VOICE_ID_2
                 play_audio(greeting, current_voice_id)
-                conversation_active = True
-                threading.Thread(target=listen_to_speech).start()
             elif key_event.keycode == 'KEY_ESC':
                 print("Program stopped")
                 exit(0)
@@ -120,10 +67,24 @@ def main():
 
     print(f"Listening on {keyboard.path}")
     try:
+        while True:
+            for fd in r:
+                for event in keyboard.read():
+                    handle_key_press(event)
+            if conversation_active and not stop_listening.is_set():
+                threading.Thread(target=listen_to_speech).start()
+    except Exception as e:
+        print(f"An error occurred: {e}")
+    finally:
+        keyboard.close()
+
+def main():
+    keyboard = InputDevice('/dev/input/event0')
+
+    print(f"Listening on {keyboard}")
+    try:
         for event in keyboard.read_loop():
             handle_key_press(event)
-            if conversation_active and not stop_listening.is_set():
-                stop_listening.set()
     except Exception as e:
         print(f"An error occurred: {e}")
     finally:
