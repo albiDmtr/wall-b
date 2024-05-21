@@ -28,6 +28,7 @@ microphone = sr.Microphone()
 conversation_active = False
 current_voice_id = None
 stop_listening = threading.Event()
+lock = threading.Lock()
 
 def get_greeting():
     try:
@@ -57,12 +58,13 @@ def play_audio(text, voice_id):
 
 def listen_to_speech():
     global conversation_active
-    with microphone as source:
-        print("Listening for speech...")
-        recognizer.adjust_for_ambient_noise(source)
-        print("Adjusting for ambient noise")
-        audio = recognizer.listen(source)
-        print("Created audio = recognizer.listen(source)")
+    with lock:  # Ensure no other thread can access the microphone
+        with microphone as source:
+            print("Listening for speech...")
+            recognizer.adjust_for_ambient_noise(source)
+            print("Adjusting for ambient noise")
+            audio = recognizer.listen(source)
+            print("Created audio = recognizer.listen(source)")
     try:
         text = recognizer.recognize_google(audio)
         print(f"Recognized speech: {text}")
