@@ -1,6 +1,5 @@
 from evdev import InputDevice, categorize, ecodes
 from openai import OpenAI
-from evdev import InputDevice, categorize, ecodes
 from elevenlabs import play
 from elevenlabs.client import ElevenLabs
 import speech_recognition as sr
@@ -57,18 +56,21 @@ def play_audio(text, voice_id):
 def listen_to_speech(recognizer, microphone):
     with microphone as source:
         print("Listening for speech...")
+        recognizer.adjust_for_ambient_noise(source)
+        print("adjusting for ambient noise")
         audio = recognizer.listen(source)
+        print("created audio = recognizer.listen(source)")
     try:
-        text2 = recognizer.recognize_google(audio)
-        print(f"Recognized speech: {text2}")
-        return text2
+        text = recognizer.recognize_google(audio)
+        print(f"Recognized speech: {text}")
+        return text
     except sr.UnknownValueError:
         print("Speech recognition could not understand audio")
         return None
     except sr.RequestError as e:
         print(f"Could not request results from Google Speech Recognition service; {e}")
         return None
-   
+    
     # Simulate recognized speech for testing
     #print("Simulating speech recognition...")
     #time.sleep(2)  # Simulate delay for speech recognition
@@ -76,17 +78,16 @@ def listen_to_speech(recognizer, microphone):
     #print(f"Recognized speech: {simulated_text}")
     #return simulated_text
 
-
-def respond_to_speech(text2):
+def respond_to_speech(text):
     try:
-        chat_completion2 = openai_client.chat.completions.create(
+        chat_completion = openai_client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "The assistant is helpful, extremely sarcastic, and engages in conversation about Build It hackathons that are hosted every 2 to 3 weeks at Startup Sauna. Generate only 2 sentences or less."},
-                {"role": "user", "content": text2}
+                {"role": "user", "content": text}
             ]
         )
-        response = chat_completion2.choices[0].message.content.strip()
+        response = chat_completion.choices[0].message.content.strip()
         return response
     except Exception as e:
         print(f"Error responding to speech with ChatGPT: {e}")
