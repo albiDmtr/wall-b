@@ -1,7 +1,4 @@
-#GPIO can be only used with Raspberry Pi
-
 from evdev import InputDevice, categorize, ecodes
-import RPi.GPIO as GPIO
 from openai import OpenAI
 from evdev import InputDevice, categorize, ecodes
 from elevenlabs import play
@@ -10,12 +7,6 @@ import speech_recognition as sr
 import time
 import os
 import json
-
-left_wheel_pin = 17
-right_wheel_pin = 22
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(left_wheel_pin, GPIO.OUT, initial=GPIO.HIGH)
-GPIO.setup(right_wheel_pin, GPIO.OUT, initial=GPIO.HIGH)
 
 config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'config.json')
 
@@ -119,17 +110,7 @@ def handle_key_press(key_event):
                 conversation_active = True
             elif key_event.keycode == 'KEY_ESC':
                 print("Program stopped")
-                exit(0)
-            elif key_event.keycode == 'KEY_LEFT':
-                GPIO.output(right_wheel_pin, GPIO.LOW)
-                print("Left wheel is ON")
-            elif key_event.keycode == 'KEY_RIGHT':
-                GPIO.output(left_wheel_pin, GPIO.LOW)
-                print("Right wheel is ON")
-            elif key_event.keycode == 'KEY_UP':
-                GPIO.output(left_wheel_pin, GPIO.LOW)
-                GPIO.output(right_wheel_pin, GPIO.LOW)
-                print("Both wheels are ON")    
+                exit(0)  
 
 def main():
     keyboard = InputDevice('/dev/input/event0')
