@@ -77,10 +77,9 @@ def listen_to_speech():
         except sr.RequestError as e:
             print(f"Could not request results from Google Speech Recognition service; {e}")
         finally:
-            if not stop_listening.is_set():
-                continue
-            conversation_active = False
-            stop_listening.clear()
+            if stop_listening.is_set():
+                conversation_active = False
+                stop_listening.clear()
 
 def respond_to_speech(text):
     try:
@@ -117,6 +116,8 @@ def handle_key_press(key_event):
                 threading.Thread(target=listen_to_speech).start()
             elif key_event.keycode == 'KEY_ESC':
                 print("Program stopped")
+                conversation_active = False
+                stop_listening.set()
                 exit(0)
 
 def main():
