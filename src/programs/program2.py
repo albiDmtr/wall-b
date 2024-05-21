@@ -125,8 +125,11 @@ def main():
 
     print(f"Listening on {keyboard.path}")
     try:
-        for event in keyboard.read_loop():
-            handle_key_press(event)
+        while True:
+            r, _, _ = select.select([keyboard.fd], [], [], 0.1)
+            for fd in r:
+                for event in keyboard.read():
+                    handle_key_press(event)
             if conversation_active and not stop_listening.is_set():
                 stop_listening.set()
     except Exception as e:
