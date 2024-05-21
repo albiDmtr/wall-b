@@ -78,11 +78,11 @@ def listen_to_speech():
         except sr.RequestError as e:
             print(f"Could not request results from Google Speech Recognition service; {e}")
         finally:
-            if stop_listening.is_set():
+            if not stop_listening.is_set():
+                print("Continuing to listen...")
+            else:
                 conversation_active = False
                 stop_listening.clear()
-            else:
-                print("Continuing to listen...")
 
 def respond_to_speech(text):
     try:
