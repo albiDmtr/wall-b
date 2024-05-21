@@ -81,7 +81,9 @@ def listen_to_speech():
             if stop_listening.is_set():
                 conversation_active = False
                 stop_listening.clear()
-
+            else:
+                print("Continuing to listen...")
+                
 def respond_to_speech(text):
     try:
         chat_completion = openai_client.chat.completions.create(
@@ -103,6 +105,7 @@ def handle_key_press(key_event):
         key_event = categorize(key_event)
         if key_event.keystate == key_event.key_down:
             if key_event.keycode in ['KEY_A', 'KEY_S']:
+                print(f"Key {key_event.keycode} pressed, starting conversation...")
                 if stop_listening.is_set():
                     stop_listening.clear()
                 conversation_active = False  # Reset conversation
