@@ -29,7 +29,6 @@ microphone = sr.Microphone()
 conversation_active = False
 current_voice_id = None
 stop_listening = threading.Event()
-listening_thread = None
 lock = threading.Lock()
 
 def get_greeting():
@@ -59,7 +58,7 @@ def play_audio(text, voice_id):
         print(f"An error occurred during audio generation or playback: {e}")
 
 def listen_to_speech():
-    global conversation_active, listening_thread
+    global conversation_active
     while conversation_active:
         with lock:  # Ensure no other thread can access the microphone
             with microphone as source:
@@ -79,13 +78,7 @@ def listen_to_speech():
         except sr.RequestError as e:
             print(f"Could not request results from Google Speech Recognition service; {e}")
         finally:
-            if not stop_listening.is_set():
-                print("Continuing to listen...")
-                # Restart the thread to continue listening
-                listening_thread = threading.Thread(target=listen_to_speech)
-                listening_thread.start()
-                break
-            else:
+            if stop_listening.is_set():
                 conversation_active = False
                 stop_listening.clear()
 
@@ -105,14 +98,13 @@ def respond_to_speech(text):
         return "Sorry, I couldn't understand that."
 
 def handle_key_press(key_event):
-    global conversation_active, current_voice_id, stop_listening, listening_thread
+    global conversation_active, current_voice_id, stop_listening
     if key_event.type == ecodes.EV_KEY:
         key_event = categorize(key_event)
         if key_event.keystate == key_event.key_down:
             if key_event.keycode in ['KEY_A', 'KEY_S']:
                 print(f"Key {key_event.keycode} pressed, starting conversation...")
-                if stop_listening.is_set():
-                    stop_listening.clear()
+                stop_listening.set()
                 conversation_active = False  # Reset conversation
                 greeting = get_greeting()
                 print(f"Greeting generated: {greeting}")
@@ -122,17 +114,12 @@ def handle_key_press(key_event):
                     current_voice_id = ELEVENLABS_VOICE_ID_2
                 play_audio(greeting, current_voice_id)
                 conversation_active = True
-                if listening_thread and listening_thread.is_alive():
-                    stop_listening.set()
-                    listening_thread.join()
-                listening_thread = threading.Thread(target=listen_to_speech)
-                listening_thread.start()
+                stop_listening.clear()
+                threading.Thread(target=listen_to_speech).start()
             elif key_event.keycode == 'KEY_ESC':
                 print("Program stopped")
                 conversation_active = False
                 stop_listening.set()
-                if listening_thread and listening_thread.is_alive():
-                    listening_thread.join()
                 exit(0)
 
 def main():
@@ -146,7 +133,7 @@ def main():
                 for event in keyboard.read():
                     handle_key_press(event)
             if conversation_active and not stop_listening.is_set():
-                stop_listening.set()
+                threading.Thread(target=listen_to_speech).start()
     except Exception as e:
         print(f"An error occurred: {e}")
     finally:
