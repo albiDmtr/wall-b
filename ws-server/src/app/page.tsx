@@ -7,6 +7,7 @@ import { Switch } from '@chakra-ui/react'
 import Image from 'next/image'
 import Joystick from "./Joystick";
 import { ArrowForwardIcon } from '@chakra-ui/icons'
+import ActionWithParam from "./ActionWithParam";
 
 export default function Home() {
   const [isConnected, setIsConnected] = useState(false);
@@ -110,14 +111,15 @@ export default function Home() {
         </div>
         <div className="box">
           <h2>Actions</h2>
+          <button className="btn" onClick={() => {sendAction("greet")}}>
+            <Image className="img" src="/emojis/waving-hand.png" alt="Icon" width={20} height={20}  />
+            Greet
+          </button>
           <button className="btn" onClick={() => {sendAction("stuck")}}>
-            <Image className="img" src="/emojis/washing-machine.png" alt="Washing machine" width={20} height={20}  />
+            <Image className="img" src="/emojis/washing-machine.png" alt="Icon" width={20} height={20}  />
             {"I'm Stuck"}
           </button>
-          <button className="btn" onClick={() => {sendAction("stuck")}}>
-            <Image className="img" src="/icons/google-meet.png" alt="Washing machine" width={18} height={18}  />
-            Send Google Meet Link
-          </button>
+          <ActionWithParam actionType="meetLink" buttonText="Send Google Meet Link" iconPath="/icons/google-meet.png" />
         </div>
       </div>
     </ChakraProvider>
