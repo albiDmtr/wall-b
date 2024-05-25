@@ -112,7 +112,7 @@ export default function Home() {
           <h2>Actions</h2>
           <button className="btn" onClick={() => {sendAction("stuck")}}>
             <Image className="img" src="/emojis/washing-machine.png" alt="Washing machine" width={20} height={20}  />
-            I'm Stuck
+            {"I'm Stuck"}
           </button>
           <button className="btn" onClick={() => {sendAction("stuck")}}>
             <Image className="img" src="/icons/google-meet.png" alt="Washing machine" width={18} height={18}  />

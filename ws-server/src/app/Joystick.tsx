@@ -113,7 +113,7 @@ const Joystick = () => {
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
         };
-    }, []);
+    }, [handleKeyDown, handleKeyUp]);
 
     return (
     <div className="joystick-cont box">
