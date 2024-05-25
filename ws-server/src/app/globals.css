@@ -202,3 +202,8 @@ h2 {
 .window.hidden {
   display: none;
 }
+
+body {
+  width: 100vw;
+  overflow-x: hidden;
+}

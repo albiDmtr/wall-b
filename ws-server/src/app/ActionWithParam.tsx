@@ -1,4 +1,4 @@
-import { act, useState } from "react";
+import { useEffect, useState } from "react";
 import { socket } from "../socket";
 import { ArrowForwardIcon } from '@chakra-ui/icons'
 import Image from 'next/image'
@@ -18,6 +18,16 @@ const ActionWithParam = ({actionType, iconPath, buttonText}: Props) => {
         setText("");
         setIsOpen(false);
     }
+
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.width = '100vw';
+            document.body.style.height = '100vh';
+            document.body.style.overflowY = 'hidden';
+        } else {
+            document.body.style.overflowY = 'visible';
+        }
+    }, [isOpen])
 
     return (
         <>

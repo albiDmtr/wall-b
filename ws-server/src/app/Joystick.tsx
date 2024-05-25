@@ -54,6 +54,7 @@ const Joystick = () => {
 
     useEffect(() => {
         if (!isMouseDown) {
+            document.body.style.overflowY = 'visible';
             return;
         }
         socket.emit("joystick", -angle*180/Math.PI);
@@ -63,9 +64,15 @@ const Joystick = () => {
             }
         }, 500);
     
+        // disable scroll
+        document.body.style.width = '100vw';
+        document.body.style.height = '100vh';
+        document.body.style.overflowY = 'hidden';
+
         return () => {
             clearInterval(interval);
         };
+
     }, [isMouseDown, angle]);
 
     const handleKeyDown = (event: any) => {
