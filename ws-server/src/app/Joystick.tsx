@@ -1,7 +1,7 @@
 'use client'
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, use } from "react";
 import { ArrowLeftIcon, ChevronLeftIcon } from '@chakra-ui/icons'
-import { position } from "@chakra-ui/react";
+import { socket } from "../socket";
 
 const Joystick = () => {
     const [isMouseDown, setIsMouseDown] = useState(false);
@@ -23,11 +23,11 @@ const Joystick = () => {
         setAngle(Math.atan2(y, x));
         setDistance(Math.hypot(x, y));
         if (isMouseDown) {
-                setJoystickPointerStyle({
-                    position: "absolute",
-                    top: `calc(50% + ${Math.sin(angle) * 40}px)`,
-                    left: `calc(50% + ${Math.cos(angle) * 40}px)`,
-                })
+            setJoystickPointerStyle({
+                position: "absolute",
+                top: `calc(50% + ${Math.sin(angle) * 40}px)`,
+                left: `calc(50% + ${Math.cos(angle) * 40}px)`,
+            })
         } else {
             setJoystickPointerStyle({
                 position: "absolute",
@@ -52,8 +52,25 @@ const Joystick = () => {
         })
     }
 
+    useEffect(() => {
+        if (!isMouseDown) {
+            return;
+        }
+        socket.emit("joystick", -angle*180/Math.PI);
+        const interval = setInterval(() => {
+            if (isMouseDown) {
+                socket.emit("joystick", -angle*180/Math.PI);
+            }
+        }, 500);
+    
+        return () => {
+            clearInterval(interval);
+        };
+    }, [isMouseDown, angle]);
+
     const handleKeyDown = (event: any) => {
         setKeysPressed(keysPressed + 1);
+        setIsMouseDown(true);
 
         setDistance(40);
         let newAngle = angle;
@@ -75,13 +92,12 @@ const Joystick = () => {
             top: `calc(50% + ${Math.sin(newAngle) * 40}px)`,
             left: `calc(50% + ${Math.cos(newAngle) * 40}px)`,
         })
-
-        console.log(newAngle);
     }
     const handleKeyUp = () => {
         if (keysPressed == 0) {
             setDistance(0);
             setAngle(0);
+            setIsMouseDown(false);
             setJoystickPointerStyle({
                 position: "absolute",
                 top: "50%",

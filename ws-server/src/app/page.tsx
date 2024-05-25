@@ -13,12 +13,22 @@ export default function Home() {
   const [transport, setTransport] = useState("N/A");
   const [wallbActive, setWallbActive] = useState(false);
   const [autocontrol, setAutocontrol] = useState(false);
+  const [newMessage, setNewMessage] = useState("");
 
   const status = (status: string) => {
     console.log(status);
-    if (JSON.parse(status).wallB === "active") {
+    if (JSON.parse(status).wallB) {
       setWallbActive(true);
     }
+  }
+
+  const sendMessage = () => {
+    socket.emit("message", newMessage);
+    setNewMessage("");
+  }
+
+  const sendAction = (action: string) => {
+    socket.emit("action", action);
   }
 
   useEffect(() => {
@@ -64,8 +74,8 @@ export default function Home() {
           <p className="wallbstat-cont">
             Wall-B {
             wallbActive ? 
-            <span className="wallbstatus"><span className="status inactive"></span> Inactive</span> :
-            <span className="wallbstatus"><span className="status active"></span> Active</span>
+            <span className="wallbstatus"><span className="status active"></span> Active</span> :
+            <span className="wallbstatus"><span className="status inactive"></span> Inactive</span>
             }
           </p>
         </div>
@@ -83,23 +93,31 @@ export default function Home() {
         </div>
         <Joystick />
         <div className="box">
-          <h2>Actions</h2>
-          <button className="btn">
-            <Image className="img" src="/emojis/washing-machine.png" alt="Washing machine" width={20} height={20}  />
-            I'm Stuck
-          </button>
-        </div>
-        <div className="box">
           <h2>Say something</h2>
-          <form className="message" action="">
-            <input type="text" />
+            <form className="message" action=""
+            onSubmit={(event) => {
+              event.preventDefault();
+              sendMessage();
+            }}>
+            <input type="text" value={newMessage} onChange={event => setNewMessage(event.target.value)}/>
             <div className="button-cont">
-              <button className="btn">
+              <button className="btn" type="submit">
                 Send
                 <ArrowForwardIcon className="" w={4} h={4} />
             </button>
             </div>
           </form>
+        </div>
+        <div className="box">
+          <h2>Actions</h2>
+          <button className="btn" onClick={() => {sendAction("stuck")}}>
+            <Image className="img" src="/emojis/washing-machine.png" alt="Washing machine" width={20} height={20}  />
+            I'm Stuck
+          </button>
+          <button className="btn" onClick={() => {sendAction("stuck")}}>
+            <Image className="img" src="/icons/google-meet.png" alt="Washing machine" width={18} height={18}  />
+            Send Google Meet Link
+          </button>
         </div>
       </div>
     </ChakraProvider>

@@ -21,6 +21,12 @@ app.prepare().then(() => {
 
     socket.on("auth", (msg) => {
       users.set(socket.id, msg);
+      console.log(`user id: ${msg}`);
+      console.log(`{"wallB": ${Array.from(users.values()).includes("wallB")}}`)
+    });
+
+    socket.on("joystick", (msg) => {
+      console.log(`joystick: ${msg}`);
     });
 
     socket.on("disconnect", () => {

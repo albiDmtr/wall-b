@@ -110,6 +110,7 @@ button {
   color: white;
   border-radius: 30px;
   font-weight: 500 !important;
+  margin: 2px;
 }
 button:hover {
   background-color: rgb(43, 43, 43) !important;
@@ -143,6 +144,7 @@ button:hover {
 .img {
   display: inline !important;
   margin-bottom: -4px;
+  margin-right: 6px;
 }
 
 .arrow {
