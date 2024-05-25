@@ -6,6 +6,8 @@ import speech_recognition as sr
 import time
 import os
 import json
+import threading
+import select
 
 config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'config.json')
 
@@ -26,6 +28,8 @@ microphone = sr.Microphone()
 
 conversation_active = False
 current_voice_id = None
+stop_listening = threading.Event()
+lock = threading.Lock()
 
 def get_greeting():
     try:
@@ -53,30 +57,30 @@ def play_audio(text, voice_id):
     except Exception as e:
         print(f"An error occurred during audio generation or playback: {e}")
 
-def listen_to_speech(recognizer, microphone):
-    with microphone as source:
-        print("Listening for speech...")
-        recognizer.adjust_for_ambient_noise(source)
-        print("adjusting for ambient noise")
-        audio = recognizer.listen(source)
-        print("created audio = recognizer.listen(source)")
-    try:
-        text = recognizer.recognize_google(audio)
-        print(f"Recognized speech: {text}")
-        return text
-    except sr.UnknownValueError:
-        print("Speech recognition could not understand audio")
-        return None
-    except sr.RequestError as e:
-        print(f"Could not request results from Google Speech Recognition service; {e}")
-        return None
-    
-    # Simulate recognized speech for testing
-    #print("Simulating speech recognition...")
-    #time.sleep(2)  # Simulate delay for speech recognition
-    #simulated_text = "Tell me more about the Build It hackathon."
-    #print(f"Recognized speech: {simulated_text}")
-    #return simulated_text
+def listen_to_speech():
+    global conversation_active
+    while conversation_active:
+        with lock:  # Ensure no other thread can access the microphone
+            with microphone as source:
+                print("Listening for speech...")
+                recognizer.adjust_for_ambient_noise(source)
+                print("Adjusting for ambient noise")
+                audio = recognizer.listen(source)
+                print("Created audio = recognizer.listen(source)")
+        try:
+            text = recognizer.recognize_google(audio)
+            print(f"Recognized speech: {text}")
+            if len(text.split()) >= 3:  # Check if the recognized speech has at least 3 words
+                response = respond_to_speech(text)
+                play_audio(response, current_voice_id)
+        except sr.UnknownValueError:
+            print("Speech recognition could not understand audio")
+        except sr.RequestError as e:
+            print(f"Could not request results from Google Speech Recognition service; {e}")
+        finally:
+            if stop_listening.is_set():
+                conversation_active = False
+                stop_listening.clear()
 
 def respond_to_speech(text):
     try:
@@ -94,12 +98,13 @@ def respond_to_speech(text):
         return "Sorry, I couldn't understand that."
 
 def handle_key_press(key_event):
-    global conversation_active, current_voice_id
+    global conversation_active, current_voice_id, stop_listening
     if key_event.type == ecodes.EV_KEY:
         key_event = categorize(key_event)
         if key_event.keystate == key_event.key_down:
             if key_event.keycode in ['KEY_A', 'KEY_S']:
-                # Start or restart the conversation with the appropriate greeting
+                print(f"Key {key_event.keycode} pressed, starting conversation...")
+                stop_listening.set()
                 conversation_active = False  # Reset conversation
                 greeting = get_greeting()
                 print(f"Greeting generated: {greeting}")
@@ -109,23 +114,26 @@ def handle_key_press(key_event):
                     current_voice_id = ELEVENLABS_VOICE_ID_2
                 play_audio(greeting, current_voice_id)
                 conversation_active = True
+                stop_listening.clear()
+                threading.Thread(target=listen_to_speech).start()
             elif key_event.keycode == 'KEY_ESC':
                 print("Program stopped")
-                exit(0)  
+                conversation_active = False
+                stop_listening.set()
+                exit(0)
 
 def main():
     keyboard = InputDevice('/dev/input/event0')
 
-    print(f"Listening on {keyboard}")
+    print(f"Listening on {keyboard.path}")
     try:
-        for event in keyboard.read_loop():
-            handle_key_press(event)
-            if conversation_active:
-                speech_text = listen_to_speech(recognizer, microphone)
-                if speech_text:
-                    response = respond_to_speech(speech_text)
-                    play_audio(response, current_voice_id)
-                    time.sleep(1)
+        while True:
+            r, _, _ = select.select([keyboard.fd], [], [], 0.1)
+            for fd in r:
+                for event in keyboard.read():
+                    handle_key_press(event)
+            if conversation_active and not stop_listening.is_set():
+                threading.Thread(target=listen_to_speech).start()
     except Exception as e:
         print(f"An error occurred: {e}")
     finally:

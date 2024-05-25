@@ -15,10 +15,10 @@ def handle_key_press(key_event):
     if key_event.type == ecodes.EV_KEY:
         key_event = categorize(key_event)
         if key_event.keystate == key_event.key_down:
-            if key_event.keycode == 'KEY_RIGHT':
+            if key_event.keycode == 'KEY_LEFT':
                 GPIO.output(right_wheel_pin, GPIO.LOW)
                 print("Left wheel is ON")
-            elif key_event.keycode == 'KEY_LEFT':
+            elif key_event.keycode == 'KEY_RIGHT':
                 GPIO.output(left_wheel_pin, GPIO.LOW)
                 print("Right wheel is ON")
             elif key_event.keycode == 'KEY_UP':
