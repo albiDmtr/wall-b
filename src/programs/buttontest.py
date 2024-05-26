@@ -3,7 +3,7 @@ import RPi.GPIO as GPIO
 import time
 
 # Load the WAV file (use raw string or double backslashes)
-wave_obj = sa.WaveObject.from_wave_file(r"public\stop.wav")
+wave_obj = sa.WaveObject.from_wave_file("public/stop.wav")
 
 # GPIO setup
 button_pin = 16  # Adjust the pin number as necessary
