@@ -65,22 +65,6 @@ def handle_key_press(key_event):
 def main():
     keyboard = InputDevice('/dev/input/event0')
 
-    print(f"Listening on {keyboard.path}")
-    try:
-        while True:
-            for fd in r:
-                for event in keyboard.read():
-                    handle_key_press(event)
-            if conversation_active and not stop_listening.is_set():
-                threading.Thread(target=listen_to_speech).start()
-    except Exception as e:
-        print(f"An error occurred: {e}")
-    finally:
-        keyboard.close()
-
-def main():
-    keyboard = InputDevice('/dev/input/event0')
-
     print(f"Listening on {keyboard}")
     try:
         for event in keyboard.read_loop():
