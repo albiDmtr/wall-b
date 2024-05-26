@@ -1,14 +1,18 @@
 from evdev import InputDevice, categorize, ecodes
 import RPi.GPIO as GPIO
+import time
+import subprocess
 
 # GPIO setup
 left_wheel_pin = 17
 #left_wheel_pin_back = 27
 right_wheel_pin = 22
+button_pin = 16
 #right_wheel_pin_back = 23
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(left_wheel_pin, GPIO.OUT, initial=GPIO.HIGH)
 GPIO.setup(right_wheel_pin, GPIO.OUT, initial=GPIO.HIGH)
+GPIO.setup(button_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 #GPIO.setup(left_wheel_pin_back, GPIO.OUT, initial=GPIO.HIGH)
 #GPIO.setup(right_wheel_pin_back, GPIO.OUT, initial=GPIO.HIGH)
 
@@ -37,6 +41,15 @@ def handle_key_press(key_event):
                 GPIO.output(left_wheel_pin, GPIO.HIGH)
                 GPIO.output(right_wheel_pin, GPIO.HIGH)
                 print("Wheels are OFF")
+
+try:
+    while True:
+        button_state = GPIO.input(button_pin)
+        if button_state == GPIO.LOW:
+            subprocess.run(["mpg321", "public\stop.mp3"])
+        time.sleep(0.5)
+except KeyboardInterrupt:
+    GPIO.cleanup()        
 
 for event in keyboard.read_loop():
     handle_key_press(event)
