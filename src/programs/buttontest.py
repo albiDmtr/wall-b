@@ -11,6 +11,7 @@ try:
     while True:
         button_state = GPIO.input(button_pin)
         if button_state == GPIO.LOW:
+            print("button pressed")
             subprocess.run(["mpg321", "public\stop.mp3"])
         time.sleep(0.5)
 except KeyboardInterrupt:
