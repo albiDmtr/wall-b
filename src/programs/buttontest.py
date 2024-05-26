@@ -1,5 +1,6 @@
 import RPi.GPIO as GPIO
 import time
+import subprocess
 
 # Set up the GPIO pin
 button_pin = 16
@@ -9,8 +10,8 @@ GPIO.setup(button_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Enable internal pul
 try:
     while True:
         button_state = GPIO.input(button_pin)
-        if button_state == GPIO.HIGH:  # Button pressed (connected to GND)
-            print("Button Pressed")
-        time.sleep(0.1)
+        if button_state == GPIO.LOW:
+            subprocess.run(["mpg321", "public\stop.mp3"])
+        time.sleep(0.5)
 except KeyboardInterrupt:
-    GPIO.cleanup()
+    GPIO.cleanup()     
