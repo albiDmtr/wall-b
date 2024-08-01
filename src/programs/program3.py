@@ -25,7 +25,7 @@ def get_greeting():
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": ""},
-                {"role": "user", "content": "You are an extremely sarcastic AI who likes to say mean and fly jokes. Your task is to relentlessly market a hackathon called Build It to people who are in front of you and really trying to force them to scan the qr code below. Generate only 2 sentences or less."}
+                {"role": "user", "content": "The assistant is helpful, extremely sarcastic, and engages in conversation about Pitch It events that are hosted every month at Startup Sauna. Remember to mention the event name Pitch It. Generate only 2 sentences or less."}
             ]
         )
         greeting = chat_completion.choices[0].message.content.strip()
