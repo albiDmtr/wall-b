@@ -8,7 +8,6 @@ from openai import OpenAI
 import json
 import os
 import time
-import cv2
 
 config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'config.json')
 
