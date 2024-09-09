@@ -6,8 +6,10 @@ from elevenlabs import play
 from elevenlabs.client import ElevenLabs
 import os
 import json
+import threading
 
-button_pin = 16
+# GPIO setup for the button
+button_pin = 16  # Adjust the pin number as necessary
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(button_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
@@ -68,30 +70,31 @@ def handle_key_press(key_event):
                 print("Program stopped")
                 exit(0)
 
-def handle_button_press():
+def monitor_button():
     global current_voice_id
-    if GPIO.input(button_pin) == GPIO.LOW:  # Button is pressed
-        greeting = get_greeting()
-        print(f"Greeting generated: {greeting}")
-        current_voice_id = ELEVENLABS_VOICE_ID_1  # Assign a voice ID for button press
-        play_audio(greeting, current_voice_id)
-        while GPIO.input(button_pin) == GPIO.LOW:
-            time.sleep(0.1)  # Wait until the button is released
+    while True:
+        if GPIO.input(button_pin) == GPIO.LOW:  # Button is pressed
+            print("Button pressed!")  # Debug print to ensure button press is detected
+            greeting = get_greeting()
+            print(f"Greeting generated: {greeting}")
+            current_voice_id = ELEVENLABS_VOICE_ID_1  # Assign a voice ID for button press
+            play_audio(greeting, current_voice_id)
+            while GPIO.input(button_pin) == GPIO.LOW:  # Wait until the button is released
+                time.sleep(0.1)
+        time.sleep(0.1)
 
 def main():
     keyboard = InputDevice('/dev/input/event0')
     print(f"Listening on {keyboard}")
-    
+
+    # Start the button monitoring thread
+    button_thread = threading.Thread(target=monitor_button)
+    button_thread.daemon = True  # Ensure the thread closes when the program exits
+    button_thread.start()
+
     try:
-        while True:
-            # Handle keyboard events
-            for event in keyboard.read_loop():
-                handle_key_press(event)
-            
-            # Handle button press
-            handle_button_press()
-            time.sleep(0.1)
-            
+        for event in keyboard.read_loop():
+            handle_key_press(event)
     except Exception as e:
         print(f"An error occurred: {e}")
     finally:
