@@ -83,7 +83,7 @@ def respond_to_speech(text):
         chat_completion = openai_client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "The assistant is helpful, extremely sarcastic, and engages in conversation about Pitch It events that are hosted every month at Startup Sauna. Remember to mention the event name "Pitch It". Generate only 2 sentences or less."},
+                {"role": "system", "content": "The assistant is helpful, extremely sarcastic, and engages in conversation about Pitch It events that are hosted every month at Startup Sauna. Remember to mention the event name Pitch It. Generate only 2 sentences or less."},
                 {"role": "user", "content": text}
             ]
         )
