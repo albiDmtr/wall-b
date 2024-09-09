@@ -1,9 +1,15 @@
+import RPi.GPIO as GPIO
+import time
 from evdev import InputDevice, categorize, ecodes
 from openai import OpenAI
 from elevenlabs import play
 from elevenlabs.client import ElevenLabs
 import os
 import json
+
+button_pin = 16
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(button_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'config.json')
 
@@ -62,17 +68,35 @@ def handle_key_press(key_event):
                 print("Program stopped")
                 exit(0)
 
+def handle_button_press():
+    global current_voice_id
+    if GPIO.input(button_pin) == GPIO.LOW:  # Button is pressed
+        greeting = get_greeting()
+        print(f"Greeting generated: {greeting}")
+        current_voice_id = ELEVENLABS_VOICE_ID_1  # Assign a voice ID for button press
+        play_audio(greeting, current_voice_id)
+        while GPIO.input(button_pin) == GPIO.LOW:
+            time.sleep(0.1)  # Wait until the button is released
+
 def main():
     keyboard = InputDevice('/dev/input/event0')
-
     print(f"Listening on {keyboard}")
+    
     try:
-        for event in keyboard.read_loop():
-            handle_key_press(event)
+        while True:
+            # Handle keyboard events
+            for event in keyboard.read_loop():
+                handle_key_press(event)
+            
+            # Handle button press
+            handle_button_press()
+            time.sleep(0.1)
+            
     except Exception as e:
         print(f"An error occurred: {e}")
     finally:
         keyboard.close()
+        GPIO.cleanup()
 
 if __name__ == "__main__":
     main()
