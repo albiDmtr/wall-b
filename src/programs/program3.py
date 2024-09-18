@@ -77,7 +77,7 @@ def monitor_button():
             print("Button pressed!")  # Debug print to ensure button press is detected
             greeting = get_greeting()
             print(f"Greeting generated: {greeting}")
-            current_voice_id = ELEVENLABS_VOICE_ID_1  # Assign a voice ID for button press
+            current_voice_id = ELEVENLABS_VOICE_ID_2  # Assign a voice ID for button press
             play_audio(greeting, current_voice_id)
             while GPIO.input(button_pin) == GPIO.LOW:  # Wait until the button is released
                 time.sleep(0.1)
