@@ -33,7 +33,7 @@ def get_greeting():
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": ""},
-                {"role": "user", "content": "We are hosting an event called 'Build It Evening'. The idea is that people come together and work on their own side projects. You need to hype people up. Keep the answer 1-2 sentences long."}
+                {"role": "user", "content": "We are hosting an event called 'Build It Evening'. The idea is that people come together and work on their own side projects. You need to hype people up with sarcastic jokes. Keep the answer very short like 1 sentence."}
             ]
         )
         greeting = chat_completion.choices[0].message.content.strip()
