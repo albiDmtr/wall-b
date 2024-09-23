@@ -33,14 +33,14 @@ def get_greeting():
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": ""},
-                {"role": "user", "content": "We are hosting an event called 'Build It Evening'. The idea is that people come together and work on their own side projects. You need to hype people up with sarcastic jokes. Keep the answer very short like 1 sentence."}
+                {"role": "user", "content": "You are a funny AI robot that is greeting participants coming to an AI tech meetup. You as a robot have a red big button attached to you. When somebody presses the button, you are gonna give a greeting to them and welcoming them to the AI meetup. But you are funny, so involve a sarcastic joke in the creeting. Your answer should be only max 1-2 sentences long."}
             ]
         )
         greeting = chat_completion.choices[0].message.content.strip()
         return greeting
     except Exception as e:
         print(f"Error getting greeting from ChatGPT: {e}")
-        return "Wazzup my homie. Join Build It hackathon, scan the QR code below!"
+        return "Wazzup my homie!"
 
 def play_audio(text, voice_id):
     try:
@@ -77,7 +77,7 @@ def monitor_button():
             print("Button pressed!")  # Debug print to ensure button press is detected
             greeting = get_greeting()
             print(f"Greeting generated: {greeting}")
-            current_voice_id = ELEVENLABS_VOICE_ID_2  # Assign a voice ID for button press
+            current_voice_id = ELEVENLABS_VOICE_ID_1  # Assign a voice ID for button press
             play_audio(greeting, current_voice_id)
             while GPIO.input(button_pin) == GPIO.LOW:  # Wait until the button is released
                 time.sleep(0.1)
