@@ -40,7 +40,7 @@ def get_greeting():
         return greeting
     except Exception as e:
         print(f"Error getting greeting from ChatGPT: {e}")
-        return "Wazzup my homie. Join Build It hackathon, scan the QR code below!"
+        return "Wazzup my homie!"
 
 def play_audio(text, voice_id):
     try:
