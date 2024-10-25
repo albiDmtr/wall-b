@@ -5,11 +5,11 @@ TRIG = 31
 ECHO = 29
 
 h = GPIO.gpiochip_open(0)
-GPIO.claim_output(h, TRIG)
-GPIO.claim_input(h, ECHO)
+GPIO.gpio_claim_output(h, TRIG)
+GPIO.gpio_claim_input(h, ECHO)
 
 def get_distance():
-    GPIO.write(h, TRIG, 0)
+    GPIO.gpio_write(h, TRIG, 0)
     time.sleep(2)
 
     GPIO.gpio_write(h, TRIG, 1)
