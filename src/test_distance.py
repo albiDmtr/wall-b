@@ -1,8 +1,8 @@
 import lgpio as GPIO
 import time
 
-TRIG = 31
-ECHO = 29
+TRIG = 6
+ECHO = 5
 
 h = GPIO.gpiochip_open(0)
 GPIO.gpio_claim_output(h, TRIG)
