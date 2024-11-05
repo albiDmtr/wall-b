@@ -27,8 +27,8 @@ def turn_left_and_right():
 
 try:
     while True:
-        back_and_forth()
-        turn_left_and_right()
+        move.motor_driver.move("forward")
+        time.sleep(2)
 
 except KeyboardInterrupt:
     print("Exiting program")
