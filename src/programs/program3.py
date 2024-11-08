@@ -160,7 +160,6 @@ def main():
     
     try:
         for event in keyboard.read_loop():
-            print("lolll")
             handle_key_press(event)
     except Exception as e:
         print(f"An error occurred: {e}")
