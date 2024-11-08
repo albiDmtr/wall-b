@@ -1,6 +1,6 @@
 import RPi.GPIO as GPIO
 import time
-from evddev import InputDevice, categorize, ecodes
+from evdev import InputDevice, categorize, ecodes
 from openai import OpenAI
 from elevenlabs import play
 from elevenlabs.client import ElevenLabs
@@ -96,6 +96,7 @@ def main():
 
     try:
         for event in keyboard.read_loop():
+            print("lolll")
             handle_key_press(event)
     except Exception as e:
         print(f"An error occurred: {e}")
