@@ -9,7 +9,7 @@ import json
 import threading
 
 # GPIO setup for the button
-button_pin = 16  # Adjust the pin number as necessary
+button_pin = 23  # Adjust the pin number as necessary
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(button_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
@@ -54,12 +54,10 @@ def play_audio(text, voice_id):
         print(f"An error occurred during audio generation or playback: {e}")
 
 def handle_key_press(key_event):
-    print(key_event)
     global current_voice_id
     if key_event.type == ecodes.EV_KEY:
         key_event = categorize(key_event)
         if key_event.keystate == key_event.key_down:
-            print("lol")
             if key_event.keycode in ['KEY_A', 'KEY_S']:
                 greeting = get_greeting()
                 print(f"Greeting generated: {greeting}")
