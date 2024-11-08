@@ -1,6 +1,6 @@
 import RPi.GPIO as GPIO
 import time
-from evdev import InputDevice, categorize, ecodes
+from evddev import InputDevice, categorize, ecodes
 from openai import OpenAI
 from elevenlabs import play
 from elevenlabs.client import ElevenLabs
@@ -54,10 +54,12 @@ def play_audio(text, voice_id):
         print(f"An error occurred during audio generation or playback: {e}")
 
 def handle_key_press(key_event):
+    print(key_event)
     global current_voice_id
     if key_event.type == ecodes.EV_KEY:
         key_event = categorize(key_event)
         if key_event.keystate == key_event.key_down:
+            print("lol")
             if key_event.keycode in ['KEY_A', 'KEY_S']:
                 greeting = get_greeting()
                 print(f"Greeting generated: {greeting}")
