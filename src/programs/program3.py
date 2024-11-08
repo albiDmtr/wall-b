@@ -9,7 +9,7 @@ import json
 import threading
 
 # GPIO setup for the button
-button_pin = 16  # Adjust the pin number as necessary
+button_pin = 23  # Adjust the pin number as necessary
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(button_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
@@ -33,7 +33,7 @@ def get_greeting():
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": ""},
-                {"role": "user", "content": "You are a funny AI robot that is greeting participants coming to an AI tech meetup. You as a robot have a red big button attached to you. When somebody presses the button, you are gonna give a greeting to them and welcoming them to the AI meetup. But you are funny, so involve a sarcastic joke in the creeting. Your answer should be only max 1-2 sentences long."}
+                {"role": "user", "content": "You are in a hachathon called Junction. You are supposed to greet people and welcome them to Junction hackathon. Remember, you are extremely sarcastic and say stupid punch line jokes. Your answer should be max one to two sentences long."}
             ]
         )
         greeting = chat_completion.choices[0].message.content.strip()
@@ -94,6 +94,7 @@ def main():
 
     try:
         for event in keyboard.read_loop():
+            print("lolll")
             handle_key_press(event)
     except Exception as e:
         print(f"An error occurred: {e}")
