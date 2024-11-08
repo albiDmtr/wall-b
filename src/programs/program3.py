@@ -9,8 +9,9 @@ import json
 import threading
 
 # GPIO setup for the button
-button_pin = 16  # Adjust the pin number as necessary
+button_pin = 23  # Adjust the pin number as necessary
 GPIO.setmode(GPIO.BCM)
+#GPIO.setup(button_pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(button_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'config.json')
@@ -33,7 +34,7 @@ def get_greeting():
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": ""},
-                {"role": "user", "content": "You are a funny AI robot that is greeting participants coming to an AI tech meetup. You as a robot have a red big button attached to you. When somebody presses the button, you are gonna give a greeting to them and welcoming them to the AI meetup. But you are funny, so involve a sarcastic joke in the creeting. Your answer should be only max 1-2 sentences long."}
+                {"role": "user", "content": "Tell us sarcastic joke."}
             ]
         )
         greeting = chat_completion.choices[0].message.content.strip()
@@ -73,6 +74,7 @@ def handle_key_press(key_event):
 def monitor_button():
     global current_voice_id
     while True:
+        print(GPIO.input(button_pin))
         if GPIO.input(button_pin) == GPIO.LOW:  # Button is pressed
             print("Button pressed!")  # Debug print to ensure button press is detected
             greeting = get_greeting()
