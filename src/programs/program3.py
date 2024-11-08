@@ -6,7 +6,9 @@ from elevenlabs import play
 from elevenlabs.client import ElevenLabs
 import os
 import json
+import subprocess
 import threading
+import cv2
 
 # GPIO setup for the button
 button_pin = 23  # Adjust the pin number as necessary
@@ -75,13 +77,67 @@ def monitor_button():
     while True:
         if GPIO.input(button_pin) == GPIO.LOW:  # Button is pressed
             print("Button pressed!")  # Debug print to ensure button press is detected
-            greeting = get_greeting()
-            print(f"Greeting generated: {greeting}")
-            current_voice_id = ELEVENLABS_VOICE_ID_1  # Assign a voice ID for button press
-            play_audio(greeting, current_voice_id)
+            subprocess.run(["mpv","/home/wallb/Desktop/wall-b/public/r2d2.mp3"])
+            #greeting = get_greeting()
+
+            #print(f"Greeting generated: {greeting}")
+            #current_voice_id = ELEVENLABS_VOICE_ID_1  # Assign a voice ID for button press
+            #play_audio(greeting, current_voice_id)
             while GPIO.input(button_pin) == GPIO.LOW:  # Wait until the button is released
                 time.sleep(0.1)
         time.sleep(0.1)
+
+
+def control_motor():
+    while True:
+        if GPIO.input(button_pin) == GPIO.LOW:  # Button is pressed
+            print("Notor running")  # Debug print to ensure button press is detected
+            #greeting = get_greeting()
+
+            #print(f"Greeting generated: {greeting}")
+            #current_voice_id = ELEVENLABS_VOICE_ID_1  # Assign a voice ID for button press
+            #play_audio(greeting, current_voice_id)
+            while GPIO.input(button_pin) == GPIO.LOW:  # Wait until the button is released
+                time.sleep(0.1)
+        time.sleep(0.1)
+
+def start_cam():
+    cam_port = 0
+    cam = cv2.VideoCapture(cam_port)
+
+    global cam_on
+    cam_on = True
+
+    while cam_on:
+        result, image = cam.read()
+
+        if not result:
+	        # If captured image is corrupted
+	        print("No image detected. Please! try again")
+	        continue
+
+        # If image will detected without any error,
+        # show result
+
+        # showing result, it take frame name and image
+        # output
+        cv2.imshow("GeeksForGeeks", image)
+
+        # saving image in local storage
+        cv2.imwrite("GeeksForGeeks.png", image)
+
+        # FPS: in ms
+        cv2.waitKey(100)
+
+
+def kill_cam():
+        # If keyboard interrupt occurs, destroy image
+        # window
+        cv2.waitKey(0)
+        cv2.destroyWindow("GeeksForGeeks")
+
+        global cam_on
+        cam_on = False
 
 def main():
     keyboard = InputDevice('/dev/input/event0')
@@ -92,6 +148,16 @@ def main():
     button_thread.daemon = True  # Ensure the thread closes when the program exits
     button_thread.start()
 
+    #cam_thread = threading.Thread(target=start_cam)
+    #cam_thread.daemon = True
+    #cam_thread.start()
+    #
+    #
+    #camkill_thread = threading.Thread(target=kill_cam)
+    #camkill_thread.daemon = True
+    #camkill_thread.start()
+    
+    
     try:
         for event in keyboard.read_loop():
             print("lolll")
