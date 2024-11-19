@@ -1,5 +1,8 @@
+print("HELLO\n\n")
+
 from evdev import InputDevice, categorize, ecodes
 import RPi.GPIO as GPIO
+
 
 # GPIO setup
 left_wheel_pin = 17
@@ -13,10 +16,11 @@ GPIO.setup(left_wheel_pin_back, GPIO.OUT, initial=GPIO.LOW)
 GPIO.setup(right_wheel_pin_back, GPIO.OUT, initial=GPIO.LOW)
 
 # Specify the device path for the keyboard (find it using `ls /dev/input/by-id/`)
-keyboard = InputDevice('/dev/input/event0')  # Adjust event number as necessary
+keyboard = InputDevice('/dev/input/event13')  # Adjust event number as necessary
+print("KEYBOARD",keyboard)
 
 def handle_key_press(key_event):
-    #print(key_event)
+    print(key_event)
     if key_event.type == ecodes.EV_KEY:
         key_event = categorize(key_event)
         if key_event.keystate == key_event.key_down:

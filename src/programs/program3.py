@@ -9,11 +9,18 @@ import json
 import subprocess
 import threading
 import cv2
+import numpy as np
 
 # GPIO setup for the button
 button_pin = 23  # Adjust the pin number as necessary
+trig_pin = 10
+front_sensor_pin = 9
+
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(button_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(trig_pin, GPIO.OUT, initial=GPIO.LOW)
+GPIO.setup(front_sensor_pin, GPIO.IN)
+
 
 config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'config.json')
 
@@ -68,6 +75,12 @@ def handle_key_press(key_event):
                 else:
                     current_voice_id = ELEVENLABS_VOICE_ID_2
                 play_audio(greeting, current_voice_id)
+            elif key_event.keycode == 'KEY_P':
+                GPIO.output(trig_pin, GPIO.HIGH)
+                time.sleep(0.0001)
+                GPIO.output(trig_pin, GPIO.LOW)
+                print("pulse")
+            
             elif key_event.keycode == 'KEY_ESC':
                 print("Program stopped")
                 exit(0)
@@ -107,24 +120,48 @@ def start_cam():
 
     global cam_on
     cam_on = True
+    
+    cv2.namedWindow("Camera", cv2.WINDOW_GUI_NORMAL)
+    #cv2.setWindwosProperty(
+    #    "Camera",
+    #    cv2.WND_PROP_FULLSCREEN,
+    #    cv2.WINDOW_FULLSCREEN
+    #)
+    #cv2.setWindwosProperty(
+    #    "Camera",
+    #    cv2.WND_PROP_AUTOSIZE,
+    #    cv2.WINDOW_NORMAL
+    #)
+    #cv2.setWindwosProperty(
+    #    "Camera",
+    #    cv2.WND_PROP_ASPECT_RATIO,
+    #    cv2.WINDOW_FREERATIO
+    #)
+
 
     while cam_on:
         result, image = cam.read()
-
+    
         if not result:
 	        # If captured image is corrupted
 	        print("No image detected. Please! try again")
 	        continue
-
+        
+        kernel1 = np.array([[1/6, 0, -1/6],
+                            [1/6, 0, -1/6],
+                            [1/6, 0, 1/6]])
+        
+        conv_image = cv2.filter2D(src = image, ddepth = -1, kernel = kernel1)
+        
         # If image will detected without any error,
         # show result
 
+        cv2.imshow("Camera", conv_image)
         # showing result, it take frame name and image
-        # output
-        cv2.imshow("GeeksForGeeks", image)
-
+        # output+
+            
         # saving image in local storage
-        cv2.imwrite("GeeksForGeeks.png", image)
+        cv2.imwrite("GeeksForGeeks.png", conv_image)
 
         # FPS: in ms
         cv2.waitKey(100)
@@ -134,13 +171,21 @@ def kill_cam():
         # If keyboard interrupt occurs, destroy image
         # window
         cv2.waitKey(0)
-        cv2.destroyWindow("GeeksForGeeks")
+        cv2.destroyWindow("Camera")
 
         global cam_on
         cam_on = False
 
+def sensor_data():
+    while True:
+        while GPIO.input(front_sensor_pin) != GPIO.HIGH:
+            ...
+        time.sleep(0.25)
+    
+    
+
 def main():
-    keyboard = InputDevice('/dev/input/event0')
+    keyboard = InputDevice('/dev/input/event13')
     print(f"Listening on {keyboard}")
 
     # Start the button monitoring thread
@@ -148,14 +193,18 @@ def main():
     button_thread.daemon = True  # Ensure the thread closes when the program exits
     button_thread.start()
 
-    #cam_thread = threading.Thread(target=start_cam)
-    #cam_thread.daemon = True
-    #cam_thread.start()
-    #
-    #
-    #camkill_thread = threading.Thread(target=kill_cam)
-    #camkill_thread.daemon = True
-    #camkill_thread.start()
+    cam_thread = threading.Thread(target=start_cam)
+    cam_thread.daemon = True
+    cam_thread.start()
+    
+    
+    camkill_thread = threading.Thread(target=kill_cam)
+    camkill_thread.daemon = True
+    camkill_thread.start()
+    
+    sensor_data_thread = threading.Thread(target=sensor_data)
+    sensor_data_thread.daemon = False
+    sensor_data_thread.start()
     
     
     try:
