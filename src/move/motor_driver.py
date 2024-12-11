@@ -14,22 +14,20 @@ GPIO.setup(left_IN1, GPIO.OUT)
 GPIO.setup(left_IN2, GPIO.OUT)
 
 def left_forward():
-    print("left forward")
-    GPIO.output(left_IN1, GPIO.HIGH)
-    GPIO.output(left_IN2, GPIO.LOW)
-
-def left_backward():
     GPIO.output(left_IN1, GPIO.LOW)
     GPIO.output(left_IN2, GPIO.HIGH)
 
-def right_forward():
-    print("right forward")
-    GPIO.output(right_IN1, GPIO.HIGH)
-    GPIO.output(right_IN2, GPIO.LOW)
+def left_backward():
+    GPIO.output(left_IN1, GPIO.HIGH)
+    GPIO.output(left_IN2, GPIO.LOW)
 
-def right_backward():
+def right_forward():
     GPIO.output(right_IN1, GPIO.LOW)
     GPIO.output(right_IN2, GPIO.HIGH)
+
+def right_backward():
+    GPIO.output(right_IN1, GPIO.HIGH)
+    GPIO.output(right_IN2, GPIO.LOW)
 
 def stop():
     GPIO.output(right_IN1, GPIO.LOW)
