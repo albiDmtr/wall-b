@@ -17,18 +17,17 @@ def back_and_forth():
 
 def turn_left_and_right():
     move.motor_driver.turn("right")
-    time.sleep(1)
+    time.sleep(4)
     move.motor_driver.stop()
     time.sleep(0.4)
     move.motor_driver.turn("left")
-    time.sleep(1)
+    time.sleep(4)
     move.motor_driver.stop()
     time.sleep(0.4)
 
 try:
     while True:
-        move.motor_driver.move("forward")
-        time.sleep(2)
+        turn_left_and_right()
 
 except KeyboardInterrupt:
     print("Exiting program")
