@@ -22,7 +22,6 @@ export const systemPrompt =
         (such as 'cup' is similar to 'mug'). Returns the matching object name from objects if a similar object 
         was found, null if there was no similar object.
 
-
         Skills:
 
         - approach(object): (object: string) => boolean // Aproaches object as close as possible without collision. Can be 

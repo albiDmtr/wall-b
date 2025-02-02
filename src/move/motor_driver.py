@@ -1,8 +1,8 @@
 import RPi.GPIO as GPIO
 import time
 
-right_IN1 = 21
-right_IN2 = 20
+right_IN1 = 20
+right_IN2 = 21
 left_IN1 = 16
 left_IN2 = 26
 
