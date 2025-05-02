@@ -3,6 +3,8 @@ import cv2
 import numpy as np
 from cam.hitnet.utils_hitnet import *
 
+from pycoral.utils import edgetpu
+
 try:
     from tflite_runtime.interpreter import Interpreter
 except:
@@ -30,7 +32,15 @@ class HitNet():
 
 		self.model_type = model_type
 
-		self.interpreter = Interpreter(model_path=model_path, num_threads=4)
+		#self.interpreter = Interpreter(model_path=model_path, num_threads=4)
+		self.interpreter = edgetpu.make_interpreter(
+			model_path=model_path,
+			device=":0",
+			delegate_options={
+				"experimental_allow_all_tflite_ops": True,
+				"debug_log_objects": True
+			}
+		)
 		self.interpreter.allocate_tensors()
 
 		# Get model info

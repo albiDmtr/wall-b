@@ -1,5 +1,5 @@
 import cv2
-from cam.hitnet import HitNet, ModelType, draw_disparity, draw_depth, CameraConfig, load_img
+from cam.hitnet import HitNet, ModelType, draw_disparity
 import os
 import time
 import numpy as np
@@ -8,7 +8,6 @@ import json
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-
 
 SCRIPT_DIR = Path(__file__).parent.absolute()
 frame_width = 1280
@@ -31,19 +30,6 @@ def load_calibration_params(json_path=None):
         'R': np.array(params['R']),
         'T': np.array(params['T'])
     }
-
-def cap():
-    cap = cv2.VideoCapture(0)
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 2*frame_width)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, frame_height)
-
-    ret, frame = cap.read()
-    cap.release()
-    if ret:
-        print("Captured image")
-        return frame
-    else:
-        raise Exception("Could not capture image")
 
 def save_to_desktop(frame):
     desktop_path = str(Path.home() / "Desktop")
@@ -96,19 +82,18 @@ def undistort_rectify(frame):
 
     return left_undistorted, right_undistorted
 
-def disparity_map(left_img, right_img):
-    model_type = ModelType.eth3d
+def disparity_map(left_img, right_img, model_size="240x320"):
 
-    if model_type == ModelType.middlebury:
-        model_path = SCRIPT_DIR / 'hitnet' / 'models' / 'middlebury_d400' / 'saved_model_480x640' / 'model_float32.tflite'
-    elif model_type == ModelType.flyingthings:
-        model_path = SCRIPT_DIR / 'hitnet' / 'models' / 'flyingthings_finalpass_xl' / 'saved_model_480x640' / 'model_float32.tflite'
-    elif model_type == ModelType.eth3d:
+    if model_size=="480x640":
         model_path = SCRIPT_DIR / 'hitnet' / 'models' / 'eth3d' / 'saved_model_480x640' / 'model_float32.tflite'
+    elif model_size=="240x320":
+        model_path = SCRIPT_DIR / 'hitnet' / 'models' / 'eth3d' / 'saved_model_240x320' / 'model_float32.tflite'
+    elif model_size=="120x160":
+        model_path = SCRIPT_DIR / 'hitnet' / 'models' / 'eth3d' / 'saved_model_120x160' / 'model_float32.tflite'
     model_path = Path(model_path).as_posix()
 
     # initialize model
-    hitnet_depth = HitNet(model_path, model_type)
+    hitnet_depth = HitNet(model_path, ModelType.eth3d)
 
     # estimate the depth
     disparity_map = hitnet_depth(left_img, right_img)
