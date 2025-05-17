@@ -3,12 +3,8 @@ import cv2
 import numpy as np
 from cam.hitnet.utils_hitnet import *
 
-from pycoral.utils import edgetpu
 
-try:
-    from tflite_runtime.interpreter import Interpreter
-except:
-    from tensorflow.lite.python.interpreter import Interpreter
+import tensorflow as tf
 
 drivingStereo_config = CameraConfig(0.546, 1000)
 
@@ -32,15 +28,17 @@ class HitNet():
 
 		self.model_type = model_type
 
-		#self.interpreter = Interpreter(model_path=model_path, num_threads=4)
-		self.interpreter = edgetpu.make_interpreter(
-			model_path=model_path,
-			device=":0",
-			delegate_options={
-				"experimental_allow_all_tflite_ops": True,
-				"debug_log_objects": True
+		'''edge_tpu_delegate = tf.load_delegate(
+			'libedgetpu.so.1',
+			options={
+				"experimental_allow_all_tflite_ops": True
 			}
+		)'''
+		self.interpreter = tf.lite.Interpreter(
+			model_path=model_path,
+			num_threads=4
 		)
+
 		self.interpreter.allocate_tensors()
 
 		# Get model info

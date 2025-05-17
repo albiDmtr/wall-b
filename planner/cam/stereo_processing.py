@@ -32,10 +32,10 @@ def load_calibration_params(json_path=None):
     }
 
 def save_to_desktop(frame):
-    desktop_path = str(Path.home() / "Desktop")
+    file_path = str(Path.home() / "Desktop")
     timestamp = time.strftime("%Y%m%d_%H%M%S")
     filename = f"capture_{timestamp}.jpg"
-    filepath = os.path.join(desktop_path, filename)
+    filepath = os.path.join(file_path, filename)
     cv2.imwrite(filepath, frame)
 
 camera_params = None
@@ -82,8 +82,7 @@ def undistort_rectify(frame):
 
     return left_undistorted, right_undistorted
 
-def disparity_map(left_img, right_img, model_size="240x320"):
-
+def init_hitnet(model_size="240x320"):
     if model_size=="480x640":
         model_path = SCRIPT_DIR / 'hitnet' / 'models' / 'eth3d' / 'saved_model_480x640' / 'model_float32.tflite'
     elif model_size=="240x320":
@@ -94,6 +93,13 @@ def disparity_map(left_img, right_img, model_size="240x320"):
 
     # initialize model
     hitnet_depth = HitNet(model_path, ModelType.eth3d)
+    return hitnet_depth
+
+hitnet_depth = None
+def disparity_map(left_img, right_img):
+    global hitnet_depth
+    if hitnet_depth is None:
+        hitnet_depth = init_hitnet()
 
     # estimate the depth
     disparity_map = hitnet_depth(left_img, right_img)
