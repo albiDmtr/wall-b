@@ -1,27 +1,18 @@
 from cam.stereo_processing import undistort_rectify, save_to_desktop, visualize_disparity
 from cam.stereo_cam import stereo_cam
-from object_detection.efficientdet import EfficientDet
 import numpy as np
 import cv2
 import time
+from ws_client import run_client
+from listen.listener import listener
 
-if __name__ == "__main__":
-    # Initialize the stereo camera
-    camera = stereo_cam()
-    camera.start()
-    
-    frame = camera.capture()
-    save_to_desktop(frame)
+#run_client()
 
-    left, right = undistort_rectify(frame)
-    depthmap = visualize_disparity(left, right)
-    
-    save_to_desktop(depthmap)
+lis = listener()
 
-    object_detector = EfficientDet()
-    objects = object_detector.detect(left)
-    print(objects)
-    
+start_time = time.time()
+print(lis.listen())
+end_time = time.time()
 
-    # clean up
-    camera.stop()
+print("Time taken to run listener:", time.time() - start_time)
+

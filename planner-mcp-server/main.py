@@ -12,6 +12,23 @@ MCP_call_queue = queue.Queue()
 # Create an MCP server
 mcp = FastMCP("Wall-B-Control")
 
+def look_for_msg(type, field_name=None, field_value=None, timeout=10):
+    start_time = time.time()
+    while time.time() - start_time < timeout:
+        try:
+            response = MCP_call_queue.get_nowait()
+
+            if response.get('type') == type:
+                if field_name is None or response.get(field_name) == field_value:
+                    return response
+                
+            # put non-matching message back
+            MCP_call_queue.put(response)
+            
+        except queue.Empty:
+            time.sleep(0.1)
+            continue
+
 def read_md(filename):
     current_dir = os.path.dirname(os.path.abspath(__file__))
     markdown_path = os.path.join(current_dir, filename)
@@ -21,7 +38,7 @@ def read_md(filename):
 
 @mcp.tool()
 def get_plandocs() -> str:
-    """Get general imformation about the Wall-B robot and documentation about the planning language required by the control tool."""
+    """Get general information about the Wall-B robot and documentation about the planning language required by the control tool."""
     plandocs = read_md('plandocs.md')
     return plandocs
 
@@ -30,32 +47,25 @@ def check_online() -> bool:
     """Check if the Wall-B robot is turned on an online"""
     MCP_call_queue.put({'type': 'ping'})
 
-    start_time = time.time()
-    while time.time() - start_time < 3:
-        if not MCP_call_queue.empty():
-            response = MCP_call_queue.get()
-
-            if response.get('type') == 'pong' and response.get('name') == 'wall-b-hardware':
-                return True
-            else:
-                # put non-matching messages back in queue
-                MCP_call_queue.put(response)
-        time.sleep(0.1)
-
-    return False
+    pong = look_for_msg('pong', 'name', 'wall-b-hardware', 3)
+    return (pong is not None)
 
 @mcp.tool()
 def control(plan: str) -> str:
     """Submit commands to Wall-B the robot in the required format.
-    Returns 'success' if plan execution was successful, an error or status message if it wasn't.
+    Always check the documentation for the required format of the plan before using this tool.
+    Returns logs ending with `[Plan executed successfully]` if plan execution was successful, an error or status message if it wasn't.
     """
 
     # add the plan to the queue
-    MCP_call_queue.put({'plan': plan})
-    time.sleep(300)  # Simulate a delay for the plan to be executed
+    MCP_call_queue.put({'type':'plan', 'plan': plan})
 
-    return 'success'
+    response = look_for_msg('plan-result', None, None, 300)
 
+    if response is None:
+        return "Error: No response from Wall-B robot within the timeout period."
+    else:
+        return response.get('log')
 
 def run_mcp_server():
     mcp.run(transport='stdio')

@@ -1,4 +1,3 @@
-import RPi.GPIO as GPIO
 import time
 import sys
 import os
@@ -7,11 +6,11 @@ import move.motor_driver
 
 def back_and_forth():
     move.motor_driver.move("forward")
-    time.sleep(1)
+    time.sleep(4)
     move.motor_driver.stop()
     time.sleep(0.4)
     move.motor_driver.move("backward")
-    time.sleep(1)
+    time.sleep(4)
     move.motor_driver.stop()
     time.sleep(0.4)
 
@@ -27,9 +26,6 @@ def turn_left_and_right():
 
 try:
     while True:
-        turn_left_and_right()
-
+        back_and_forth()
 except KeyboardInterrupt:
     print("Exiting program")
-finally:
-    GPIO.cleanup() 

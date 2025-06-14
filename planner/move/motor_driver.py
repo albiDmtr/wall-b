@@ -1,41 +1,31 @@
-import RPi.GPIO as GPIO
+import os
+os.chdir('/tmp')
+os.environ['GPIOZERO_PIN_FACTORY'] = 'lgpio'
+
+from gpiozero import Motor
 import time
 
-right_IN1 = 20
-right_IN2 = 21
-left_IN1 = 16
-left_IN2 = 26
-
-# Setup
-GPIO.setmode(GPIO.BCM)  # Use BCM pin numbering
-GPIO.setup(right_IN1, GPIO.OUT)
-GPIO.setup(right_IN2, GPIO.OUT)
-GPIO.setup(left_IN1, GPIO.OUT)
-GPIO.setup(left_IN2, GPIO.OUT)
+# Initialize motors with their respective pins
+right_motor = Motor(forward=21, backward=20)
+left_motor = Motor(forward=26, backward=16)
 
 def left_forward():
-    GPIO.output(left_IN1, GPIO.LOW)
-    GPIO.output(left_IN2, GPIO.HIGH)
+    left_motor.forward()
 
 def left_backward():
-    GPIO.output(left_IN1, GPIO.HIGH)
-    GPIO.output(left_IN2, GPIO.LOW)
+    left_motor.backward()
 
 def right_forward():
-    GPIO.output(right_IN1, GPIO.LOW)
-    GPIO.output(right_IN2, GPIO.HIGH)
+    right_motor.forward()
 
 def right_backward():
-    GPIO.output(right_IN1, GPIO.HIGH)
-    GPIO.output(right_IN2, GPIO.LOW)
+    right_motor.backward()
 
 def stop():
-    GPIO.output(right_IN1, GPIO.LOW)
-    GPIO.output(right_IN2, GPIO.LOW)
-    GPIO.output(left_IN1, GPIO.LOW)
-    GPIO.output(left_IN2, GPIO.LOW)
+    left_motor.stop()
+    right_motor.stop()
 
-def move(direction = "forward"):
+def move(direction="forward"):
     if direction == "forward":
         left_forward()
         right_forward()
@@ -43,10 +33,20 @@ def move(direction = "forward"):
         left_backward()
         right_backward()
 
-def turn(direction = "right"):
+def turn(direction="right"):
     if direction == "right":
         left_forward()
         right_backward()
     elif direction == "left":
         left_backward()
         right_forward()
+
+def move_s(duration=1, direction="forward"):
+    move(direction)
+    time.sleep(duration)
+    stop()
+
+def turn_s(duration=1, side="right"):
+    turn(side)
+    time.sleep(duration)
+    stop()
