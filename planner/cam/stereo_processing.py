@@ -158,3 +158,132 @@ def disparity_to_m(disparity_val):
         fB, d_null = load_hitnet_params()
 
     return fB / (disparity_val - d_null)
+
+def crop_lower_middle(image):
+    height, width, channels = image.shape
+
+    top = height // 3
+    bottom = height
+
+    left = width // 6
+    right = width - width // 6
+
+    cropped = image[top:bottom, left:right]
+    
+    return cropped
+
+def create_obstacle_map(disp_map, rgb=False):
+    depth_map = disparity_to_m(disp_map)
+
+    # compensate for camera height
+    height, width = depth_map.shape
+    y_indices = np.arange(height).reshape(-1, 1)
+    scaling_factor = 1.4 - (1.4 - 0.6) * y_indices / (height - 1)
+    
+    # Apply scaling to compensate for camera height
+    compensated_depth = depth_map * scaling_factor
+
+    # create obstacle map based on depth thresholds
+    cutoff_depth = 1.6 # pixels further than this are ignored
+    min_depth = 1.2 # pixels closer than this will be 1
+    obstacle_map = np.clip((cutoff_depth - compensated_depth) / (cutoff_depth - min_depth), 0, 1)
+    
+    if rgb:
+        # Convert to 3-channel RGB format
+        obstacle_map = (obstacle_map * 255).astype(np.uint8)
+        obstacle_map = np.stack([obstacle_map, obstacle_map, obstacle_map], axis=-1)
+    
+    return obstacle_map
+
+def create_obstacle_profile(depth_map, add_scale=True):
+    obstacle_map = create_obstacle_map(depth_map, rgb=False)
+    # Sum along each row and divide by width to get percentage (0-1)
+    profile = np.sum(obstacle_map, axis=0) / obstacle_map.shape[0]
+    return profile
+
+def visualize_obstacle_profile(profile, add_scale=True):
+    width = len(profile)
+    height = int(0.75 * width)
+    
+    if add_scale:
+        # Create figure
+        plt.figure(figsize=(10, 6))
+        
+        # Create the profile plot
+        x = np.arange(width)
+        plt.plot(x, profile, 'b-', linewidth=2)
+        plt.ylim(0, 1)
+        plt.xlabel('Horizontal Position')
+        plt.ylabel('Obstacle Density')
+        plt.title('Obstacle Profile')
+        plt.grid(True)
+        
+        plt.tight_layout()
+        
+        # Convert the figure to an image array
+        fig = plt.gcf()
+        fig.canvas.draw()
+        image_array = np.asarray(fig.canvas.buffer_rgba())
+        plt.close()
+        
+        # Convert RGBA to RGB
+        return cv2.cvtColor(image_array, cv2.COLOR_RGBA2RGB)
+    else:
+        # Original visualization without scale
+        visualization = np.ones((height, width, 3), dtype=np.uint8) * 255
+        
+        # For each position in the profile
+        for x in range(width):
+            line_height = int(height * profile[x])
+            if line_height > 0:
+                visualization[height - line_height:height, x] = [0, 0, 0]
+        
+        return visualization
+
+def create_binary_profile(obstacle_profile):
+    profile_threshold = 0.35
+
+    binary_profile = np.select(
+        [obstacle_profile > profile_threshold],
+        [1],
+        default=0
+    )
+    
+    return binary_profile
+
+def visualize_binary_profile(disp_map):
+    binary_profile = create_binary_profile(disp_map)
+    width = len(binary_profile)
+    height = int(0.75 * width)
+    
+    # Create a white image (255, 255, 255)
+    visualization = np.ones((height, width, 3), dtype=np.uint8) * 255
+    # For each position in the profile
+    for x in range(width):
+        if binary_profile[x] == 1:
+            # Fill the entire column with red (0, 0, 255) if there's an obstacle
+            visualization[:, x] = [0, 0, 255]
+    
+    return visualization
+
+def binary_profile_from_frame(frame):
+    left, right = undistort_rectify(frame)
+    cropped_left = crop_lower_middle(left)
+    cropped_right = crop_lower_middle(right)
+    disp_map = disparity_map(cropped_left, cropped_right)
+    obstacle_profile = create_obstacle_profile(disp_map)
+    binary_profile = create_binary_profile(obstacle_profile)
+
+    return binary_profile
+
+def is_moving(prev_frame, curr_frame, template_size=50):
+    prev_gray = cv2.cvtColor(prev_frame, cv2.COLOR_BGR2GRAY)
+    curr_gray = cv2.cvtColor(curr_frame, cv2.COLOR_BGR2GRAY)
+
+    # Calculate movement
+    diff = cv2.absdiff(prev_gray, curr_gray)
+    movement_score = np.sum(diff)
+
+    print(movement_score)
+
+    return movement_score > 50

@@ -1,12 +1,15 @@
+from plan_interpreter import PlanInterpreter
 from dotenv import load_dotenv
 import websockets
 import os
 import asyncio
 import json
+from websockets.exceptions import InvalidStatus, ConnectionClosed
 
 load_dotenv()
 
 api_url = os.getenv('WS_API_URL', 'wss://firm-chimp-eagerly.ngrok-free.app')
+plan_interpreter = PlanInterpreter()
 
 async def handle_messages(websocket):
     try:
@@ -15,8 +18,16 @@ async def handle_messages(websocket):
                 data = json.loads(message)
                 print(f"Received message: {data}")
 
-                if data.type == 'ping':
+                if 'type' not in data:
+                    print("Message does not have a 'type' attribute")
+                    print(f"Message content: {data}")
+                    continue
+                elif data['type'] == 'ping':
                     await websocket.send(json.dumps({'type': 'pong', 'name': 'wall-b-hardware'}))
+                    print("Sent pong response")
+                elif data['type'] == 'plan':
+                    logs = plan_interpreter.execute(data['plan'])
+                    await websocket.send(json.dumps({'type': 'plan-result', 'log': logs}))
 
             except json.JSONDecodeError as e:
                 print(f"Failed to parse message as JSON: {e}")
@@ -32,7 +43,7 @@ async def connect():
             async with websockets.connect(api_url) as websocket:
                 print(f"Connected to {api_url}")
                 await handle_messages(websocket)
-        except (websockets.ConnectionClosed, ConnectionRefusedError, OSError) as e:
+        except (InvalidStatus, ConnectionRefusedError, ConnectionClosed) as e:
             print(f"Connection failed: {str(e)}")
             await asyncio.sleep(5)
             print("Attempting to reconnect...")

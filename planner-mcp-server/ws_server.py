@@ -8,6 +8,8 @@ MCP_call_queue = None
 
 # handle incoming websocket messages
 async def message_handler(websocket):
+    global connected_clients, MCP_call_queue
+
     connected_clients.add(websocket)
     try:
         async for message in websocket:
@@ -15,18 +17,34 @@ async def message_handler(websocket):
                 data = json.loads(message)
                 print(f"Received message: {data}")
 
-                if data.get('type') == 'pong':
+                if data.get('type') == 'pong' or data.get('type') == 'plan-result':
                     if MCP_call_queue is not None:
                         MCP_call_queue.put(data)
 
             except json.JSONDecodeError:
                 print(f"Received non-JSON message: {message}")
-                # Handle non-JSON messages if needed
                 
     except websockets.exceptions.ConnectionClosed:
         print("Client disconnected")
     finally:
         connected_clients.remove(websocket)
+
+async def ws_queue_monitor():
+    while True:
+        try:
+            if not MCP_call_queue.empty():
+                message = MCP_call_queue.get()
+
+                if message.get('type') == 'pong' or message.get('type') == 'plan-result':
+                    # put client message back to MCP call queue
+                    MCP_call_queue.put(message)
+                else:
+                    json_message = json.dumps(message)
+                    await broadcast_message(json_message)
+        except Exception as e:
+            print(f"Error in queue monitor: {e}")
+
+        await asyncio.sleep(0.1)
 
 # broadcast message to all connected clients
 async def broadcast_message(message, exclude=None):
@@ -35,24 +53,6 @@ async def broadcast_message(message, exclude=None):
             *[client.send(message) for client in connected_clients]
         )
 
-async def ws_queue_monitor():
-    while True:
-        try:
-            if not MCP_call_queue.empty():
-                message = MCP_call_queue.get()
-                json_message = json.dumps(message)
-                await broadcast_message(json_message)
-        except Exception as e:
-            print(f"Error in queue monitor: {e}")
-
-        await asyncio.sleep(0.1)
-
-async def broadcast_public_url():
-        while True:
-            await asyncio.sleep(2)
-            message = json.dumps({"public_url": "public_url"})
-            await broadcast_message(message)
-
 # start ws server
 async def start_server():
     server = await websockets.serve(message_handler, "localhost", 8765)
@@ -60,7 +60,6 @@ async def start_server():
     public_url = http_tunnel.public_url.replace("https://", "wss://")
 
     # testing
-    asyncio.create_task(broadcast_public_url())
     asyncio.create_task(ws_queue_monitor())
 
     print("WebSocket server started at ws://localhost:8765")

@@ -1,6 +1,5 @@
 from PIL import Image
 from PIL import ImageDraw
-
 from pycoral.adapters import common
 from pycoral.adapters import detect
 from pycoral.utils.dataset import read_label_file
