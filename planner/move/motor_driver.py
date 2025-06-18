@@ -4,17 +4,10 @@ os.environ['GPIOZERO_PIN_FACTORY'] = 'lgpio'
 
 from gpiozero import Motor
 import time
-import atexit
 
 # Initialize motors with their respective pins
 right_motor = Motor(forward=21, backward=20)
 left_motor = Motor(forward=26, backward=16)
-
-# Ensure motors are stopped when the program exits
-def cleanup():
-    stop()
-
-atexit.register(cleanup)
 
 def left_forward():
     left_motor.forward()
@@ -51,13 +44,9 @@ def turn(direction="right"):
 def move_s(duration=1, direction="forward"):
     move(direction)
     time.sleep(duration)
-    
-    time.sleep(0.1)
     stop()
 
 def turn_s(duration=1, side="right"):
     turn(side)
     time.sleep(duration)
-    
-    time.sleep(0.1)
     stop()
