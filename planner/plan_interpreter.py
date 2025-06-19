@@ -6,6 +6,8 @@ from object_detection.efficientdet import EfficientDet
 from cam.stereo_cam import stereo_cam
 from cam.stereo_processing import undistort_rectify
 from speak.speak import speak
+from listen.listener import listener
+from guidance import guidance
 
 class PlanInterpreter:
     def __init__(self):
@@ -13,6 +15,8 @@ class PlanInterpreter:
         self._cam.start()
         self._detector = EfficientDet()
         self._speak_listen = speak()
+        self._listener = listener()
+        self._guidance = guidance(self._cam, self._detector)
 
         self._sl_glb = sl.Globals.standard()
         self._sl_mod = sl.Module()
@@ -24,6 +28,11 @@ class PlanInterpreter:
         self._sl_mod.add_callable("get_objects", self._get_objects)
         self._sl_mod.add_callable("find_similar", self._find_similar)
         self._sl_mod.add_callable("speak", self._speak_listen.speak)
+        self._sl_mod.add_callable("listen", self._listener.listen)
+        self._sl_mod.add_callable("move_randomly", self._guidance.move_randomly)
+        self._sl_mod.add_callable("look_for_object", self._guidance.look_for_object)
+        self._sl_mod.add_callable("approach_object", self._guidance.approach_object)
+
         self._ast = None
 
         self._current_logs = 'Execution logs:\n\n'

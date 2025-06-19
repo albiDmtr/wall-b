@@ -277,13 +277,19 @@ def binary_profile_from_frame(frame):
     return binary_profile
 
 def is_moving(prev_frame, curr_frame, template_size=50):
-    prev_gray = cv2.cvtColor(prev_frame, cv2.COLOR_BGR2GRAY)
-    curr_gray = cv2.cvtColor(curr_frame, cv2.COLOR_BGR2GRAY)
+    # Extract template from center of previous frame
+    h, w = prev_frame.shape[:2]
+    template = prev_frame[h//2-template_size//2:h//2+template_size//2,
+                         w//2-template_size//2:w//2+template_size//2]
+    
+    # Search for template in current frame
+    result = cv2.matchTemplate(curr_frame, template, cv2.TM_CCOEFF_NORMED)
+    _, max_val, _, max_loc = cv2.minMaxLoc(result)
+    
+    # Check if template moved significantly
+    center_x, center_y = w//2, h//2
+    displacement = np.sqrt((max_loc[0] - center_x)**2 + (max_loc[1] - center_y)**2)
+    
+    print(displacement)
 
-    # Calculate movement
-    diff = cv2.absdiff(prev_gray, curr_gray)
-    movement_score = np.sum(diff)
-
-    print(movement_score)
-
-    return movement_score > 50
+    return displacement > 20 # pixels

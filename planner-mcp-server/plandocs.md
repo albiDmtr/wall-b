@@ -28,11 +28,18 @@ The following functions are exposed to the Starlark environment executing the pr
     - move(duration_s, direction) [(Number, 'forward'|'backward') -> None]
         Turns both wheels for duration_s seconds in the required direction.
     - turn(duration_s, side) [(Number, 'left'|'right') -> None]
-        Turns the desired wheel on for duration_s seconds in the required direction.
+        Turns the desired wheel on for duration_s seconds in the required direction. It takes around 10 seconds for the robot to do a 180 degree turn.
     - speak(text) [String -> None]:
         Uses the robot's microphones to say the given text.
     - listen(max_duration_s, stop_on_silence=True) [(Number, Boolean) -> String]:
         Takes a maximum duration in seconds as the first argument and an optional second argument
         for stop_on_silence (defaults to True). Listens to people speaking for the specified duration.
         Recording stops if a pause in speech is detected when stop_on_silence is True. Returns the
-        transcript of what was heard by the robot, or "" if it didn't hear anything.
+        transcript of what was heard by the robot, or "" if it didn't hear anything. When having a conversation, it's useful to use the replanning feature to provide customized replies.
+    - move_randomly(duration_s) [Number ->None]:
+        Move randomly in the area for duration_s seconds to discover new objects while avoiding obstacles.
+        Since the robot moves slowly, duration_s should be 30 or more seconds.
+    - look_for_object(object_label) [String -> Boolean]
+        Uses the camera to look for an object with the required COCO label. The robot rotates to find all objects around it and positions itself to face the required object if found.
+    - approach_object(object_label) [String -> Boolean]
+        Approaches object with the required COCO label. First, the robot looks for the required object in its surroundings, positions itself to face the required object, then moves forward until the required object is approached.

@@ -57,3 +57,5 @@ class listener:
 
         print("Transcription:")
         print(transcription)
+
+        return transcription

@@ -20,7 +20,7 @@ class stereo_cam:
             print("Camera is already open.")
             return
 
-        self.cap = cv2.VideoCapture(self.camera_index)
+        self.cap = cv2.VideoCapture(self.camera_index, cv2.CAP_V4L2)
         if not self.cap.isOpened():
             raise IOError(f"Cannot open camera {self.camera_index}")
 
