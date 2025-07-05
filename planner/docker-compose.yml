@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      # Mount your project directory to /app in the container
+      - .:/home
+    # Use this to access Raspberry Pi hardware
+    devices:
+      - /dev/video0:/dev/video0  # Camera
+      - /dev/bus/usb:/dev/bus/usb  # USB devices
+    environment:
+      - LIBEDGETPU_VERBOSE=1
+      - PYCORAL_LOGGING=10
+    privileged: true
+    stdin_open: true
+    tty: true
