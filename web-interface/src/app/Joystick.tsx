@@ -56,7 +56,7 @@ const Joystick = () => {
 
     const sendCommand = async (angle: number) => {
         try {
-          const response = await fetch('/api/robot-control', {
+          const response = await fetch('/api/control', {
             method: 'POST',
             headers: { 
               'Content-Type': 'application/json' 
