@@ -61,7 +61,7 @@ const Joystick = () => {
             headers: { 
               'Content-Type': 'application/json' 
             },
-            body: JSON.stringify({ 'angle' : angle })
+            body: JSON.stringify({'type' : 'move', 'angle' : angle })
           });
           
           if (!response.ok) {
