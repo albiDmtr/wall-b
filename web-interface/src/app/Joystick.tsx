@@ -54,14 +54,14 @@ const Joystick = () => {
         })
     }
 
-    const sendCommand = async (angle: number) => {
+    const sendCommand = async (type: string, params: object = {}) => {
         try {
           const response = await fetch('/api/control', {
             method: 'POST',
             headers: { 
               'Content-Type': 'application/json' 
             },
-            body: JSON.stringify({'type' : 'move', 'angle' : angle })
+            body: JSON.stringify({...params, 'type' : type })
           });
           
           if (!response.ok) {
@@ -79,13 +79,16 @@ const Joystick = () => {
     useEffect(() => {
         if (!isMouseDown) {
             document.body.style.overflowY = 'visible';
+
+            sendCommand('standby')
+
             return;
         }
         
         // Throttle the sendCommand calls
         const now = Date.now();
         if (now - lastSendTime.current >= throttleDelay) {
-            sendCommand(angle*180/Math.PI);
+            sendCommand('move', {'angle': -angle*180/Math.PI});
             lastSendTime.current = now;
         }
     
@@ -94,6 +97,9 @@ const Joystick = () => {
         document.body.style.height = '100vh';
         document.body.style.overflowY = 'hidden';
 
+        return (() => {
+            sendCommand('standby');
+        })
     }, [isMouseDown, angle]);
 
     const handleKeyDown = (event: any) => {
