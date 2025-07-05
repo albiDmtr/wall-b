@@ -10,7 +10,7 @@ class guidance:
     def __init__(self, cam, detector):
         self._cam = cam
         self._detector = detector
-        self._img_window = None
+        self._img_window = ImageDisplayer()
     
     def _has_obstacle(self, profile):
         min_continuous_obstacle_width = 4
@@ -69,11 +69,6 @@ class guidance:
             # check if there are obstacles in the way
             binary_profile = binary_profile_from_frame(frame)
 
-            if visualize:
-                if self._img_window is None:
-                    self._img_window = ImageDisplayer()
-                binary_profile_vis = visualize_binary_profile(binary_profile)
-
             # cut first and last 1/8 off of the binary profile
             binary_profile_cut = self._cut_edge_off_profile(binary_profile)
 
@@ -97,9 +92,6 @@ class guidance:
                     # turn in a random direction between 2-4 seconds
                     turn_direction = random.choice(["left", "right"])
                     self._turn_until_clear(turn_direction)
-
-                if self._img_window is not None:
-                    self._img_window.update(binary_profile_vis[:, ::-1])
             
 
     def look_for_object(self, object_name):

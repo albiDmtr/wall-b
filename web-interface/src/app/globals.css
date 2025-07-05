@@ -1,0 +1,211 @@
+.status {
+  width: 8px;
+  height: 8px;
+  display: inline-block;
+  border-radius: 50%;
+}
+.active {
+  background-color: #00ff00;
+}
+.inactive {
+  background-color: rgb(200, 200, 200);
+}
+.wallbstatus {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 4px;
+  border-radius: 5px;
+}
+
+.small {
+  font-size: 14px;
+  line-height: 14px;
+}
+
+.box {
+  padding: 8px 16px;
+  border-radius: 8px;
+  background-color: rgba(0, 0, 0, 0.05);
+  width: 324px;
+  margin: 12px auto;
+}
+
+.joystick-cont {
+  padding: 42px;
+  position: relative;
+}
+
+.joystick-outer {
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  padding: 32px;
+  background: radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0, 0, 0, 0.1) 100%);
+}
+
+.joystick-inner {
+  width: 176px;
+  height: 176px;
+  border-radius: 50%;
+  background-color: rgb(255, 255, 255);
+  border: solid 2px rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0px 0px 46px 0px rgba(0,0,0,0.25),
+  inset 0px 0px 6px 0px rgba(0,0,0,0.85);
+  position: relative;
+}
+
+.joystick-pointer {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  position: relative;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(248,248,248,1) 0%, rgba(255,255,255,1) 40%);
+  box-shadow: inset 0px 0px 16px 0px rgba(0,0,0,0.15),
+    0px 0px 4px 0px rgba(0,0,0,0.35);
+  cursor: pointer;
+}
+.joystick-pointer div {
+  width: 6px;
+  height: 6px;
+  background-color: rgb(200, 200, 200);
+  border-radius: 6px;
+}
+.joystick-pointer .front {
+  position: absolute;
+  top: 8px;
+  left: calc(50% - 3px);
+}
+.joystick-pointer .left {
+  position: absolute;
+  top: calc(50% - 3px);
+  left: 8px;
+}
+.joystick-pointer .right {
+  position: absolute;
+  top: calc(50% - 3px);
+  right: 8px;
+}
+.joystick-pointer .back {
+  position: absolute;
+  bottom: 8px;
+  left: calc(50% - 3px);
+}
+
+.controlopt {
+  padding: 10px;
+  margin: 34px 0;
+}
+.controlopt.active {
+  background-color: rgba(0, 0, 0, 0);
+  font-weight: 700;
+}
+
+button {
+  padding: 8px 14px !important;
+  background-color: rgb(13, 13, 13) !important;
+  color: white;
+  border-radius: 30px;
+  font-weight: 500 !important;
+  margin: 2px;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+button:hover {
+  background-color: rgb(43, 43, 43) !important;
+}
+
+.main-header {
+  display: flex;
+  justify-content: space-between;
+  vertical-align: middle;
+  padding: 18px;
+}
+
+.wallbstat-cont {
+  padding-top: 12px;
+  padding-right: 20px;
+  font-weight: 550;
+}
+
+.main-title span {
+  position: relative;
+  top: -13px;
+}
+
+.main-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  text-wrap: nowrap;
+}
+
+.img {
+  display: inline !important;
+  margin-bottom: -4px;
+  margin-right: 6px;
+}
+
+.arrow {
+  position: absolute;
+}
+.arrow.front {
+  top: 14px;
+  left: calc(50% - 6px);
+  transform: rotate(90deg);
+}
+.arrow.left {
+  top:  calc(50% - 10px);
+  left: 14px;
+}
+.arrow.right {
+  top:  calc(50% - 10px);
+  right: 14px;
+  transform: rotate(180deg);
+}
+.arrow.back {
+  bottom: 14px;
+  right:  calc(50% - 10px);
+  transform: rotate(270deg);
+}
+
+.mode-cont {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+h2 {
+  font-weight: 580;
+}
+
+.message input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  border: solid 1px #e5e5e5;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  background-color: rgb(250, 250, 250);
+  margin: 8px 0;
+}
+
+.button-cont {
+  text-align: right;
+}
+
+.window {
+  background: rgb(230, 230, 230);
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.window.hidden {
+  display: none;
+}
+
+body {
+  width: 100vw;
+  overflow-x: hidden;
+}

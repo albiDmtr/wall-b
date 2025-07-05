@@ -266,11 +266,18 @@ def visualize_binary_profile(disp_map):
     
     return visualization
 
-def binary_profile_from_frame(frame):
+def binary_profile_from_frame(frame, image_displayer=None):
     left, right = undistort_rectify(frame)
     cropped_left = crop_lower_middle(left)
     cropped_right = crop_lower_middle(right)
     disp_map = disparity_map(cropped_left, cropped_right)
+
+    if image_displayer is not None:
+        # normalize disp_map and create that heatmap-like visualization
+        normalized_disp_map = cv2.normalize(disp_map, None, 0, 255, cv2.NORM_MINMAX)
+        heatmap = cv2.applyColorMap(normalized_disp_map, cv2.COLORMAP_JET)
+        image_displayer.update(heatmap)
+
     obstacle_profile = create_obstacle_profile(disp_map)
     binary_profile = create_binary_profile(obstacle_profile)
 

@@ -29,6 +29,7 @@ class PlanInterpreter:
         self._sl_mod.add_callable("find_similar", self._find_similar)
         self._sl_mod.add_callable("speak", self._speak_listen.speak)
         self._sl_mod.add_callable("listen", self._listener.listen)
+        self._sl_mod.add_callable("speak_and_get_reply", self._speak_and_get_reply)
         self._sl_mod.add_callable("move_randomly", self._guidance.move_randomly)
         self._sl_mod.add_callable("look_for_object", self._guidance.look_for_object)
         self._sl_mod.add_callable("approach_object", self._guidance.approach_object)
@@ -76,9 +77,15 @@ class PlanInterpreter:
                 result.append(' ' * indentation + 'return')
 
         return '\n'.join(result)
+    
+    def _speak_and_get_reply(self, text):
+        self._speak_listen.speak(text)
+        reply = self._listener.listen(6, True)
+        self._current_logs += f'\nSpeak_and_get_reply call reached. Human reply: "{reply}"\n'
 
     def execute(self, plan):
         modified_plan = self._add_return_after_call(plan, 'find_similar')
+        modified_plan = self._add_return_after_call(plan, 'speak_and_get_reply')
         extended_plan = self._prefix + self._add_tabs(modified_plan, 1) + self._suffix
 
         print("Executing plan:")
