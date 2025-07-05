@@ -77,6 +77,9 @@ const Joystick = () => {
     };
 
     useEffect(() => {
+        console.log('Joystick changed');
+        console.log(isMouseDown, angle)
+
         if (!isMouseDown) {
             document.body.style.overflowY = 'visible';
 
