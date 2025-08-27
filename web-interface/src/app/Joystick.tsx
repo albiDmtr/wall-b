@@ -1,10 +1,11 @@
 "use client";
 import { sendCommand } from "./commands";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { ArrowLeftIcon, ChevronLeftIcon } from "@chakra-ui/icons";
 
 const Joystick = () => {
   const [isMouseDown, setIsMouseDown] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [angle, setAngle] = useState(0);
   const [distance, setDistance] = useState(0);
   const [keysPressed, setKeysPressed] = useState(0);
@@ -104,33 +105,36 @@ const Joystick = () => {
     };
   }, []);
 
-  const handleKeyDown = (event: any) => {
-    setKeysPressed((prev) => prev + 1);
-    setIsMouseDown(true);
+  const handleKeyDown = useCallback(
+    (event: any) => {
+      setKeysPressed((prev) => prev + 1);
+      setIsMouseDown(true);
 
-    setDistance(40);
-    let newAngle = angle;
-    if (event.key === "ArrowUp" || event.key === "w") {
-      newAngle = -Math.PI / 2;
-    } else if (event.key === "ArrowDown" || event.key === "s") {
-      newAngle = Math.PI / 2;
-    } else if (event.key === "ArrowLeft" || event.key === "a") {
-      newAngle = Math.PI;
-    } else if (event.key === "ArrowRight" || event.key === "d") {
-      newAngle = 0;
-    } else {
-      return;
-    }
-    setAngle(newAngle);
+      setDistance(40);
+      let newAngle = angle;
+      if (event.key === "ArrowUp" || event.key === "w") {
+        newAngle = -Math.PI / 2;
+      } else if (event.key === "ArrowDown" || event.key === "s") {
+        newAngle = Math.PI / 2;
+      } else if (event.key === "ArrowLeft" || event.key === "a") {
+        newAngle = Math.PI;
+      } else if (event.key === "ArrowRight" || event.key === "d") {
+        newAngle = 0;
+      } else {
+        return;
+      }
+      setAngle(newAngle);
 
-    setJoystickPointerStyle({
-      position: "absolute",
-      top: `calc(50% + ${Math.sin(newAngle) * 40}px)`,
-      left: `calc(50% + ${Math.cos(newAngle) * 40}px)`,
-    });
-  };
+      setJoystickPointerStyle({
+        position: "absolute",
+        top: `calc(50% + ${Math.sin(newAngle) * 40}px)`,
+        left: `calc(50% + ${Math.cos(newAngle) * 40}px)`,
+      });
+    },
+    [angle],
+  );
 
-  const handleKeyUp = () => {
+  const handleKeyUp = useCallback(() => {
     setKeysPressed((prev) => {
       const newCount = prev - 1;
       if (newCount <= 0) {
@@ -145,7 +149,7 @@ const Joystick = () => {
       }
       return Math.max(0, newCount);
     });
-  };
+  }, []);
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
@@ -155,10 +159,62 @@ const Joystick = () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [angle]);
+  }, [angle, handleKeyDown, handleKeyUp]);
+
+  const toggleExpanded = () => {
+    const newExpandedState = !isExpanded;
+    setIsExpanded(newExpandedState);
+
+    if (newExpandedState) {
+      // Enter fullscreen
+      const element = document.documentElement;
+      if (element.requestFullscreen) {
+        element.requestFullscreen();
+      } else if ((element as any).webkitRequestFullscreen) {
+        // Safari
+        (element as any).webkitRequestFullscreen();
+      } else if ((element as any).msRequestFullscreen) {
+        // IE11
+        (element as any).msRequestFullscreen();
+      }
+    } else {
+      // Exit fullscreen
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if ((document as any).webkitExitFullscreen) {
+        // Safari
+        (document as any).webkitExitFullscreen();
+      } else if ((document as any).msExitFullscreen) {
+        // IE11
+        (document as any).msExitFullscreen();
+      }
+    }
+  };
 
   return (
-    <div className="joystick-cont box">
+    <div className={`joystick-cont box ${isExpanded ? "expanded" : ""}`}>
+      <button
+        onClick={toggleExpanded}
+        style={{
+          position: "absolute",
+          top: "10px",
+          right: "10px",
+          zIndex: 1001,
+          background: "rgba(0, 0, 0, 0.7)",
+          color: "white",
+          border: "none",
+          borderRadius: "50%",
+          width: "30px",
+          height: "30px",
+          cursor: "pointer",
+          fontSize: "16px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        {isExpanded ? "−" : "+"}
+      </button>
       <ArrowLeftIcon className="arrow front" w={3} h={3} />
       <ChevronLeftIcon className="arrow left" w={5} h={5} />
       <ChevronLeftIcon className="arrow right" w={5} h={5} />
