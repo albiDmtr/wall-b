@@ -17,6 +17,25 @@
     let downloadImage = () => {};
     let getListOfObjects = () =>  {};
     let interpretScene = () => {};
+    let toggleFullscreen = () => {
+        if (!document.fullscreenElement) {
+            if (wrapper.requestFullscreen) {
+                wrapper.requestFullscreen();
+            } else if (wrapper.webkitRequestFullscreen) { // Safari
+                wrapper.webkitRequestFullscreen();
+            } else if (wrapper.msRequestFullscreen) { // IE11
+                wrapper.msRequestFullscreen();
+            }
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) { // Safari
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) { // IE11
+                document.msExitFullscreen();
+            }
+        }
+    };
     const promptLLM = () => {
         llmOutput = "Planning...";
         fetch('/api/planner', {
@@ -68,7 +87,7 @@
           console.error('Error:', error);
         });
     }
-  
+
     onMount(() => {
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -230,7 +249,7 @@
       ceiling.name = "wall-ceiling";
       scene.add(ceiling);
 
-      
+
       // Add sofa
       modelLoader.load('./models/sofa.glb', (gltf) => {
         const model = gltf.scene;
@@ -260,7 +279,7 @@
         const model = gltf.scene;
 
         model.rotation.y = Math.PI / 2;
-        
+
         model.scale.set(14, 10, 14);
         model.position.set(-19.7, 8, 5);
         model.name = "tv stand";
@@ -272,7 +291,7 @@
       // Add plant
       modelLoader.load('./models/plant.glb', (gltf) => {
         const model = gltf.scene;
-        
+
         model.scale.set(9, 9, 9);
         model.position.set(-14, 4.5, -24);
 
@@ -286,7 +305,7 @@
       modelLoader.load('./models/closet.glb', (gltf) => {
         const model = gltf.scene;
 
-        
+
         model.scale.set(9, 9, 9);
         model.position.set(15, 12, -20.5);
 
@@ -301,7 +320,7 @@
         const model = gltf.scene;
 
         model.rotation.y = Math.PI / 2;
-        
+
         model.scale.set(8, 6, 8);
         model.position.set(-15, -0.1, 25);
 
@@ -317,7 +336,7 @@
         const model = gltf.scene;
 
         model.rotation.y = Math.PI / 2;
-        
+
         model.scale.set(8, 8, 8);
         model.position.set(2, 3.4, 5);
 
@@ -330,7 +349,7 @@
       // Add newspaper to coffee table
       modelLoader.load('./models/newspaper.glb', (gltf) => {
           const model = gltf.scene;
-          
+
           model.scale.set(0.16, 0.16, 0.16);
           model.rotation.y = Math.PI / 10;
 
@@ -342,7 +361,7 @@
         console.error(error);
       });
 
-      
+
       // Kitchen models
       // Add kitchen counter
       modelLoader.load('./models/kitchen_counter.glb', (gltf) => {
@@ -371,7 +390,7 @@
         }, undefined, (error) => {
         console.error(error);
       });
-      
+
       // Add fridge
       modelLoader.load('./models/fridge.glb', (gltf) => {
           const model = gltf.scene;
@@ -451,7 +470,7 @@
         }, undefined, (error) => {
         console.error(error);
       });
-  
+
       // Function to handle keydown events
       const handleKeyDown = (event) => {
         const moveDistance = 0.5;
@@ -514,9 +533,11 @@
       };
     });
   </script>
-  <canvas bind:this={canvas} width="1200" height="800"></canvas>
-  <div class="controls">
+  <div bind:this={wrapper} class="fullscreen-wrapper">
+    <canvas bind:this={canvas} width="1200" height="800"></canvas>
+    <div class="controls">
     <div class="left">
+      <button on:click={toggleFullscreen}>Toggle Fullscreen</button>
       <button on:click={downloadImage}>Download scene</button>
       <button on:click={getListOfObjects}>List of objects</button>
       <div class="skill-cont">
@@ -544,6 +565,35 @@
       </div>
     </div>
   </div>
+  </div>
+
+  <style>
+    .fullscreen-wrapper {
+      width: 100%;
+      height: 100%;
+    }
+
+    .fullscreen-wrapper:fullscreen {
+      display: flex;
+      flex-direction: column;
+      background-color: #000;
+    }
+
+    .fullscreen-wrapper:-webkit-full-screen {
+      display: flex;
+      flex-direction: column;
+      background-color: #000;
+    }
+
+    .fullscreen-wrapper:fullscreen canvas {
+      flex: 1;
+    }
+
+    .fullscreen-wrapper:-webkit-full-screen canvas {
+      flex: 1;
+    }
+
+    /* Existing styles */
 
   <style>
     .controls {
