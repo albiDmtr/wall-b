@@ -59,8 +59,6 @@ const Joystick = () => {
     console.log(isMouseDown, angle);
 
     if (!isMouseDown) {
-      document.body.style.overflowY = "visible";
-      document.body.style.position = "";
       sendCommand("standby");
 
       return;
@@ -81,12 +79,6 @@ const Joystick = () => {
       });
       lastSendTime.current = now;
     }
-
-    // disable scroll
-    document.body.style.width = "100vw";
-    document.body.style.height = "100vh";
-    document.body.style.overflowY = "hidden";
-    document.body.style.position = "fixed";
   }, [isMouseDown, angle]);
 
   // Handle cleanup when component unmounts or when mouse is released
