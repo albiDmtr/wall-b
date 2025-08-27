@@ -48,26 +48,6 @@
     );
 }
 
-@media (max-width: 768px) {
-    .joystick-cont {
-        padding: 24px;
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        z-index: 999;
-        width: 100%;
-        background-color: rgb(245, 245, 245);
-        padding: 48px 32px;
-        margin-bottom: 0;
-    }
-    .joystick-outer {
-        margin: 0 auto;
-    }
-    body {
-        padding-bottom: 336px;
-    }
-}
-
 .joystick-inner {
     width: 176px;
     height: 176px;

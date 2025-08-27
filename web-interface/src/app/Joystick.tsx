@@ -1,6 +1,6 @@
 "use client";
 import { sendCommand } from "./commands";
-import { useEffect, useState, useRef, use } from "react";
+import { useEffect, useState, useRef } from "react";
 import { ArrowLeftIcon, ChevronLeftIcon } from "@chakra-ui/icons";
 
 const Joystick = () => {
@@ -16,9 +16,14 @@ const Joystick = () => {
   const throttleDelay = 50; // 50ms throttle - adjust as needed
 
   const handleMouseMove = (e: any) => {
+    // Prevent scrolling on touch devices
+    if (e.touches) {
+      e.preventDefault();
+    }
+
     const rect = e.target.parentNode.getBoundingClientRect();
-    const clientX = e.clientX || e.touches[0].clientX;
-    const clientY = e.clientY || e.touches[0].clientY;
+    const clientX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+    const clientY = e.clientY || (e.touches && e.touches[0].clientY) || 0;
     const x = clientX - rect.left - rect.width / 2;
     const y = clientY - rect.top - rect.height / 2;
 
@@ -41,6 +46,11 @@ const Joystick = () => {
 
   const handleMouseDown = (e: any) => {
     setIsMouseDown(true);
+
+    // Prevent scrolling on touch devices
+    if (e.touches) {
+      e.preventDefault();
+    }
   };
 
   const handleMouseUp = (e: any) => {
@@ -55,12 +65,11 @@ const Joystick = () => {
   };
 
   useEffect(() => {
-    console.log("Joystick changed");
-    console.log(isMouseDown, angle);
-
     if (!isMouseDown) {
+      // Re-enable scrolling when joystick is not in use
+      document.body.style.overflow = "";
+      document.body.style.position = "";
       sendCommand("standby");
-
       return;
     }
 
@@ -79,18 +88,24 @@ const Joystick = () => {
       });
       lastSendTime.current = now;
     }
+
+    // Disable scrolling when joystick is active
+    document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
   }, [isMouseDown, angle]);
 
-  // Handle cleanup when component unmounts or when mouse is released
+  // Handle cleanup when component unmounts
   useEffect(() => {
     return () => {
       sendCommand("standby");
+      // Restore normal scrolling behavior
+      document.body.style.overflow = "";
+      document.body.style.position = "";
     };
   }, []);
 
   const handleKeyDown = (event: any) => {
-    console.log(event.key);
-    setKeysPressed(keysPressed + 1);
+    setKeysPressed((prev) => prev + 1);
     setIsMouseDown(true);
 
     setDistance(40);
@@ -114,17 +129,22 @@ const Joystick = () => {
       left: `calc(50% + ${Math.cos(newAngle) * 40}px)`,
     });
   };
+
   const handleKeyUp = () => {
-    if (keysPressed == 0) {
-      setDistance(0);
-      setAngle(0);
-      setIsMouseDown(false);
-      setJoystickPointerStyle({
-        position: "absolute",
-        top: "50%",
-        left: "50%",
-      });
-    }
+    setKeysPressed((prev) => {
+      const newCount = prev - 1;
+      if (newCount <= 0) {
+        setDistance(0);
+        setAngle(0);
+        setIsMouseDown(false);
+        setJoystickPointerStyle({
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+        });
+      }
+      return Math.max(0, newCount);
+    });
   };
 
   useEffect(() => {
@@ -133,8 +153,9 @@ const Joystick = () => {
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
     };
-  }, []);
+  }, [angle]);
 
   return (
     <div className="joystick-cont box">
@@ -149,12 +170,16 @@ const Joystick = () => {
         onTouchMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onTouchEnd={handleMouseUp}
+        onTouchStart={(e) => e.preventDefault()}
       >
         <div className="joystick-inner" ref={joystickInner}>
           <div
             className="joystick-pointer"
             onMouseDown={handleMouseDown}
-            onTouchStart={handleMouseDown}
+            onTouchStart={(e) => {
+              e.preventDefault();
+              handleMouseDown(e);
+            }}
             onMouseUp={handleMouseUp}
             onTouchEnd={handleMouseUp}
             ref={joystickPointer}
