@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export interface RobotCommand {
-  type: "move" | "speak" | "standby";
+  type: "move" | "speak" | "standby" | "action";
   angle?: number;
   text?: string;
+  action?: string;
   timestamp?: number;
 }
 
@@ -32,6 +33,17 @@ export async function GET(request: NextRequest) {
         try {
           const data = `data: ${JSON.stringify(currentCommand)}\n\n`;
           controller.enqueue(new TextEncoder().encode(data));
+
+          // Only send speak and action commands once
+          if (
+            currentCommand.type === "speak" ||
+            currentCommand.type === "action"
+          ) {
+            currentCommand = {
+              type: "standby",
+              timestamp: Date.now(),
+            };
+          }
         } catch (error) {
           clearInterval(interval);
           try {
@@ -70,10 +82,10 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body: RobotCommand = await request.json();
-    const { type, angle, text } = body;
+    const { type, angle, text, action } = body;
 
     // Validate wheel states
-    const validTypes = ["move", "speak", "standby"] as const;
+    const validTypes = ["move", "speak", "standby", "action"] as const;
     if (!validTypes.includes(type)) {
       return NextResponse.json(
         { error: "Invalid command type." },
@@ -89,6 +101,9 @@ export async function POST(request: NextRequest) {
     if (type === "move") {
       currentCommand.angle = angle;
     } else if (type === "speak") {
+      currentCommand.text = text;
+    } else if (type === "action") {
+      currentCommand.action = action;
       currentCommand.text = text;
     }
 

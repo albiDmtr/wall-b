@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ArrowForwardIcon } from "@chakra-ui/icons";
 import Image from "next/image";
+import { sendCommand } from "./commands";
 
 interface Props {
   actionType: string;
@@ -13,7 +14,7 @@ const ActionWithParam = ({ actionType, iconPath, buttonText }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const sendAction = () => {
-    //socket.emit("action", {"action": actionType, "param": text});
+    sendCommand("action", { action: actionType, text: text });
     setText("");
     setIsOpen(false);
   };

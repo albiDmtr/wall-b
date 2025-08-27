@@ -21,10 +21,6 @@ export default function Home() {
     }
   };
 
-  const sendAction = (action: string) => {
-    //
-  };
-
   return (
     <ChakraProvider>
       <div>
@@ -106,7 +102,7 @@ export default function Home() {
           <button
             className="btn"
             onClick={() => {
-              sendAction("greet");
+              sendCommand("action", { action: "greet" });
             }}
           >
             <Image
@@ -121,7 +117,7 @@ export default function Home() {
           <button
             className="btn"
             onClick={() => {
-              sendAction("stuck");
+              sendCommand("action", { action: "stuck" });
             }}
           >
             <Image
