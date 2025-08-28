@@ -22,11 +22,11 @@ def cleanup():
             # Stop all motors
             left_motor.stop()
             right_motor.stop()
-            
+
             # Close motor connections
             left_motor.close()
             right_motor.close()
-            
+
             _cleanup_done = True
             print("Motor cleanup completed")
         except Exception as e:
@@ -89,3 +89,42 @@ def turn_s(duration=1, side="right"):
     turn(side)
     time.sleep(duration)
     stop()
+
+def move_deg(angle, speed=1.0):
+    """
+    Move the robot in a specific direction based on angle.
+
+    Args:
+        angle (float): Direction in degrees (-180 to 180)
+                      0 = forward, 90 = right, -90 = left, ±180 = backward
+        speed (float): Overall speed factor (0.0 to 1.0)
+    """
+    import math
+
+    # Normalize angle to -180 to 180 range
+    angle = ((angle + 180) % 360) - 180
+
+    # Convert to radians
+    angle_rad = math.radians(angle)
+
+    # Calculate left and right motor speeds using trigonometry
+    # We use sin and cos to get the contribution of forward/backward movement
+    # Left motor: forward speed increases with cos(angle) + sin(angle)
+    # Right motor: forward speed increases with cos(angle) - sin(angle)
+    left_speed = speed * (math.cos(angle_rad) + math.sin(angle_rad))
+    right_speed = speed * (math.cos(angle_rad) - math.sin(angle_rad))
+
+    # Clamp speeds to [-1, 1] range
+    left_speed = max(-1.0, min(1.0, left_speed))
+    right_speed = max(-1.0, min(1.0, right_speed))
+
+    # Apply speeds to motors
+    if left_speed >= 0:
+        left_motor.forward(left_speed)
+    else:
+        left_motor.backward(abs(left_speed))
+
+    if right_speed >= 0:
+        right_motor.forward(right_speed)
+    else:
+        right_motor.backward(abs(right_speed))

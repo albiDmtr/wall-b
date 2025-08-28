@@ -8,7 +8,7 @@ export interface RobotCommand {
   timestamp?: number;
 }
 
-let currentCommand: RobotCommand = {
+let currentCommand: RobotCommand | null = {
   type: "standby",
   timestamp: Date.now(),
 };
@@ -31,26 +31,21 @@ export async function GET(request: NextRequest) {
       // Send periodic updates
       interval = setInterval(() => {
         try {
-          const data = `data: ${JSON.stringify(currentCommand)}\n\n`;
-          controller.enqueue(new TextEncoder().encode(data));
+          if (currentCommand) {
+            const data = `data: ${JSON.stringify(currentCommand)}\n\n`;
+            controller.enqueue(new TextEncoder().encode(data));
+
+            currentCommand = null;
+          }
 
           // Only send speak and action commands once
-          if (
-            currentCommand.type === "speak" ||
-            currentCommand.type === "action"
-          ) {
-            currentCommand = {
-              type: "standby",
-              timestamp: Date.now(),
-            };
-          }
         } catch (error) {
           clearInterval(interval);
           try {
             controller.close();
           } catch {}
         }
-      }, 100);
+      }, 50);
 
       // Cleanup on connection close
       request.signal.addEventListener("abort", () => {

@@ -6,11 +6,14 @@ import asyncio
 import json
 import aiohttp
 from websockets.exceptions import InvalidStatus, ConnectionClosed
+from move.motor_driver import move_deg, stop
 
 load_dotenv()
 
+is_mcp_control = False
 api_url = os.getenv('WS_API_URL', 'wss://firm-chimp-eagerly.ngrok-free.app')
 http_event_url = 'https://wallb.albert.build/api/control'
+
 '''plan_interpreter = PlanInterpreter()
 
 async def handle_messages(websocket):
@@ -55,9 +58,12 @@ async def handle_http_events():
                             data = json.loads(data_str)
                             print(f"Received HTTP event: {data}")
 
-                            # Process the event data here as needed
-                            # For example, you might want to send it via WebSocket
-                            # or trigger some local action
+                            if data['type'] == 'move':
+                                move_deg(data['angle'])
+
+                            if data['type'] == 'standby':
+                                stop()
+
 
                         except json.JSONDecodeError as e:
                             print(f"Failed to parse HTTP event data: {e}")

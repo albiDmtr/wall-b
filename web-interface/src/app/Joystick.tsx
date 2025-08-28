@@ -16,6 +16,8 @@ const Joystick = () => {
   const throttleDelay = 50; // 50ms throttle - adjust as needed
 
   const handleMouseMove = (e: any) => {
+    if (!isMouseDown) return;
+
     // Prevent scrolling on touch devices
     if (e.touches) {
       e.preventDefault();
@@ -65,14 +67,6 @@ const Joystick = () => {
   };
 
   useEffect(() => {
-    if (!isMouseDown) {
-      // Re-enable scrolling when joystick is not in use
-      document.body.style.overflow = "";
-      document.body.style.position = "";
-      sendCommand("standby");
-      return;
-    }
-
     // Throttle the sendCommand calls
     const now = Date.now();
     if (now - lastSendTime.current >= throttleDelay) {
@@ -93,6 +87,16 @@ const Joystick = () => {
     document.body.style.overflow = "hidden";
     document.body.style.position = "fixed";
   }, [isMouseDown, angle]);
+
+  useEffect(() => {
+    if (!isMouseDown) {
+      // Re-enable scrolling when joystick is not in use
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      sendCommand("standby");
+      return;
+    }
+  }, [isMouseDown]);
 
   // Handle cleanup when component unmounts
   useEffect(() => {
