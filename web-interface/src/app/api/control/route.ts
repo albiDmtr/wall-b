@@ -25,8 +25,8 @@ export async function GET(request: NextRequest) {
     start(ctrl) {
       controller = ctrl; // Store reference for cleanup
 
-      // Send current command immediately
-      const data = `data: ${JSON.stringify(currentCommand)}\n\n`;
+      // Send standby command immediately
+      const data = `data: ${JSON.stringify({ type: "standby", timestamp: Date.now() })}\n\n`;
       controller.enqueue(new TextEncoder().encode(data));
 
       // Send periodic updates

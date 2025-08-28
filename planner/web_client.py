@@ -54,47 +54,81 @@ async def handle_http_events():
                     print(f"Connected to HTTP event stream: {http_event_url}")
                     last_active_time = asyncio.get_event_loop().time()
 
+                    # Create a flag to signal when to reconnect
+                    should_reconnect = asyncio.Event()
+
+                    # Start timeout checker task
+                    async def check_timeout():
+                        while True:
+                            await asyncio.sleep(1)  # Check every second
+                            if asyncio.get_event_loop().time() - last_active_time > 3:
+                                print("No active status received for more than 3 seconds, reconnecting...")
+                                should_reconnect.set()
+                                break
+
+                    timeout_task = asyncio.create_task(check_timeout())
+
                     # Read the streaming response line by line
-                    async for line in response.content:
-                        # Reset timeout timer when receiving any data
-                        last_active_time = asyncio.get_event_loop().time()
+                    async def read_stream():
+                        async for line in response.content:
+                            # Reset timeout timer when receiving any data
+                            nonlocal last_active_time
+                            last_active_time = asyncio.get_event_loop().time()
 
-                        if line.startswith(b'data: '):
-                            try:
-                                # Decode and parse the JSON data
-                                data_str = line[6:].decode('utf-8').strip()
-                                data = json.loads(data_str)
-                                print(f"Received HTTP event: {data}")
+                            if line.startswith(b'data: '):
+                                try:
+                                    # Decode and parse the JSON data
+                                    data_str = line[6:].decode('utf-8').strip()
+                                    data = json.loads(data_str)
+                                    print(f"Received HTTP event: {data}")
 
-                                # Update last active time when we receive status message
-                                if data.get('type') == 'status' and data.get('status') == 'web-client-active':
-                                    last_active_time = asyncio.get_event_loop().time()
+                                    # Update last active time when we receive status message
+                                    if data.get('type') == 'status' and data.get('status') == 'web-client-active':
+                                        last_active_time = asyncio.get_event_loop().time()
 
-                                if data['type'] == 'move':
-                                    move_deg(data['angle'])
+                                    if data['type'] == 'move':
+                                        move_deg(data['angle'])
 
-                                if data['type'] == 'speak':
-                                    mic_speak.speak(f"    {data['text']}")
+                                    if data['type'] == 'speak':
+                                        mic_speak.speak(f"    {data['text']}")
 
-                                if data['type'] == 'action':
-                                    if (data['action'] == 'stuck'):
-                                        mic_speak.speak("    Help stepbro, I'm stuck!")
+                                    if data['type'] == 'action':
+                                        if (data['action'] == 'stuck'):
+                                            mic_speak.speak("    Help stepbro, I'm stuck!")
 
-                                if data['type'] == 'standby':
+                                    if data['type'] == 'standby':
+                                        stop()
+
+                                except json.JSONDecodeError as e:
+                                    print(f"Failed to parse HTTP event data: {e}")
+                                    stop()
+                                except Exception as e:
+                                    print(f"Error processing HTTP event: {e}")
                                     stop()
 
-                            except json.JSONDecodeError as e:
-                                print(f"Failed to parse HTTP event data: {e}")
-                                stop()
-                            except Exception as e:
-                                print(f"Error processing HTTP event: {e}")
-                                stop()
+                        # If we get here, the stream ended
+                        should_reconnect.set()
 
-                        # Check if we haven't received a status update for more than 3 seconds
-                        if asyncio.get_event_loop().time() - last_active_time > 3:
-                            print("No active status received for more than 3 seconds, reconnecting...")
-                            stop()
-                            break  # Break the inner loop to trigger reconnection
+                    stream_task = asyncio.create_task(read_stream())
+
+                    # Wait for either the timeout or stream to complete
+                    done, pending = await asyncio.wait(
+                        [timeout_task, stream_task],
+                        return_when=asyncio.FIRST_COMPLETED
+                    )
+
+                    # Cancel any remaining tasks
+                    for task in pending:
+                        task.cancel()
+                        try:
+                            await task
+                        except asyncio.CancelledError:
+                            pass
+
+                    # If we should reconnect, break the connection loop
+                    if should_reconnect.is_set():
+                        stop()
+                        continue  # This will restart the outer while loop
 
         except Exception as e:
             print(f"Error connecting to HTTP event stream: {e}")
