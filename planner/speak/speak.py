@@ -2,6 +2,7 @@ import numpy as np
 import sounddevice as sd
 from piper.voice import PiperVoice
 from pathlib import Path
+import time
 
 class speak:
     def __init__(self):
@@ -10,8 +11,15 @@ class speak:
         self._voice = PiperVoice.load(speech_model)
 
     def speak(self, text):
-        stream = sd.OutputStream(samplerate=self._voice.config.sample_rate, channels=1, dtype='int16')
+        stream = sd.OutputStream(
+            samplerate=self._voice.config.sample_rate,
+            channels=1,
+            dtype='int16',
+            blocksize=1024,
+            latency='low'
+        )
         stream.start()
+        time.sleep(0.1)
 
         for audio_bytes in self._voice.synthesize_stream_raw(text):
             int_data = np.frombuffer(audio_bytes, dtype=np.int16)

@@ -105,6 +105,12 @@
     left: calc(50% - 3px);
 }
 
+.joystick-stop-btn {
+    position: absolute;
+    bottom: 10px;
+    right: 15px;
+}
+
 .controlopt {
     padding: 10px;
     margin: 34px 0;

@@ -44,7 +44,9 @@ async def handle_messages(websocket):
         return
 '''
 async def handle_http_events():
+    print('Loading speech model...')
     mic_speak = speak()
+    print('Speech model loaded. Connecting to HTTP event stream...')
     """Handle Server-Sent Events from the HTTP endpoint"""
 
     while True:
@@ -52,12 +54,9 @@ async def handle_http_events():
             async with aiohttp.ClientSession() as session:
                 async with session.get(http_event_url) as response:
                     print(f"Connected to HTTP event stream: {http_event_url}")
-                    last_active_time = asyncio.get_event_loop().time()
 
                     # Read the streaming response line by line
                     async for line in response.content:
-                        # Reset timeout timer when receiving any data
-                        last_active_time = asyncio.get_event_loop().time()
 
                         if line.startswith(b'data: '):
                             try:
@@ -66,19 +65,15 @@ async def handle_http_events():
                                 data = json.loads(data_str)
                                 print(f"Received HTTP event: {data}")
 
-                                # Update last active time when we receive status message
-                                if data.get('type') == 'status' and data.get('status') == 'web-client-active':
-                                    last_active_time = asyncio.get_event_loop().time()
-
                                 if data['type'] == 'move':
                                     move_deg(data['angle'])
 
                                 if data['type'] == 'speak':
-                                    mic_speak.speak(f"    {data['text']}")
+                                    mic_speak.speak(data['text'])
 
                                 if data['type'] == 'action':
                                     if (data['action'] == 'stuck'):
-                                        mic_speak.speak("    Help stepbro, I'm stuck!")
+                                        mic_speak.speak("Help stepbro, I'm stuck!")
 
                                 if data['type'] == 'standby':
                                     stop()

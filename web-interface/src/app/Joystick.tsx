@@ -159,7 +159,7 @@ const Joystick = () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [angle]);
+  }, []);
 
   return (
     <div className="joystick-cont box">
@@ -196,6 +196,12 @@ const Joystick = () => {
           </div>
         </div>
       </div>
+      <button
+        className="joystick-stop-btn"
+        onClick={() => sendCommand("standby")}
+      >
+        Stop
+      </button>
     </div>
   );
 };
