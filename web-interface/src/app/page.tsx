@@ -14,20 +14,6 @@ export default function Home() {
   const [autocontrol, setAutocontrol] = useState(false);
   const [newMessage, setNewMessage] = useState("");
 
-  const status = (status: string) => {
-    console.log(status);
-    if (JSON.parse(status).wallB) {
-      setWallbActive(true);
-    }
-  };
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      sendCommand("status", { status: "web-client-online" });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
     <ChakraProvider>
       <div>
