@@ -21,6 +21,13 @@ export default function Home() {
     }
   };
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      sendCommand("status", { status: "web-client-online" });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <ChakraProvider>
       <div>

@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export interface RobotCommand {
-  type: "move" | "speak" | "standby" | "action";
+  type: "move" | "speak" | "standby" | "action" | "status";
   angle?: number;
   text?: string;
   action?: string;
+  status?: string;
   timestamp?: number;
 }
 
@@ -77,10 +78,16 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body: RobotCommand = await request.json();
-    const { type, angle, text, action } = body;
+    const { type, angle, text, action, status } = body;
 
     // Validate wheel states
-    const validTypes = ["move", "speak", "standby", "action"] as const;
+    const validTypes = [
+      "move",
+      "speak",
+      "standby",
+      "action",
+      "status",
+    ] as const;
     if (!validTypes.includes(type)) {
       return NextResponse.json(
         { error: "Invalid command type." },
@@ -100,6 +107,8 @@ export async function POST(request: NextRequest) {
     } else if (type === "action") {
       currentCommand.action = action;
       currentCommand.text = text;
+    } else if (type === "status") {
+      currentCommand.status = status;
     }
 
     return NextResponse.json({
