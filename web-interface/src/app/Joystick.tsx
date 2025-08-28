@@ -114,13 +114,13 @@ const Joystick = () => {
 
     setDistance(40);
     let newAngle = angle;
-    if (event.key === "ArrowUp" || event.key === "w") {
+    if (event.key === "ArrowUp") {
       newAngle = -Math.PI / 2;
-    } else if (event.key === "ArrowDown" || event.key === "s") {
+    } else if (event.key === "ArrowDown") {
       newAngle = Math.PI / 2;
-    } else if (event.key === "ArrowLeft" || event.key === "a") {
+    } else if (event.key === "ArrowLeft") {
       newAngle = Math.PI;
-    } else if (event.key === "ArrowRight" || event.key === "d") {
+    } else if (event.key === "ArrowRight") {
       newAngle = 0;
     } else {
       return;
