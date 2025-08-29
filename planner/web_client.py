@@ -55,8 +55,18 @@ async def handle_http_events():
                 async with session.get(http_event_url) as response:
                     print(f"Connected to HTTP event stream: {http_event_url}")
 
+                    # Set a random reconnect time between 20-30 seconds
+                    import random
+                    reconnect_time = random.randint(20, 30)
+                    start_time = asyncio.get_event_loop().time()
+
                     # Read the streaming response line by line
                     async for line in response.content:
+                        # Check if it's time to reconnect
+                        if asyncio.get_event_loop().time() - start_time > reconnect_time:
+                            print(f"Reconnecting after {reconnect_time} seconds")
+                            stop()
+                            break
 
                         if line.startswith(b'data: '):
                             try:
@@ -81,9 +91,11 @@ async def handle_http_events():
                             except json.JSONDecodeError as e:
                                 print(f"Failed to parse HTTP event data: {e}")
                                 stop()
+                                break
                             except Exception as e:
                                 print(f"Error processing HTTP event: {e}")
                                 stop()
+                                break
 
         except Exception as e:
             print(f"Error connecting to HTTP event stream: {e}")
