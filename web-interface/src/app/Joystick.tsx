@@ -67,6 +67,14 @@ const Joystick = () => {
   };
 
   useEffect(() => {
+    if (!isMouseDown) {
+      // Re-enable scrolling when joystick is not in use
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      sendCommand("standby");
+      return;
+    }
+
     // Throttle the sendCommand calls
     const now = Date.now();
     if (now - lastSendTime.current >= throttleDelay) {
@@ -87,16 +95,6 @@ const Joystick = () => {
     document.body.style.overflow = "hidden";
     document.body.style.position = "fixed";
   }, [isMouseDown, angle]);
-
-  useEffect(() => {
-    if (!isMouseDown) {
-      // Re-enable scrolling when joystick is not in use
-      document.body.style.overflow = "";
-      document.body.style.position = "";
-      sendCommand("standby");
-      return;
-    }
-  }, [isMouseDown]);
 
   // Handle cleanup when component unmounts
   useEffect(() => {
