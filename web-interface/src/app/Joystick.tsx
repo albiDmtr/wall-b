@@ -112,6 +112,11 @@ const Joystick = () => {
     setKeysPressed((prev) => prev + 1);
     setIsMouseDown(true);
 
+    if (
+      !["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)
+    )
+      return;
+
     setDistance(40);
     let newAngle = angle;
     if (event.key === "ArrowUp") {
@@ -122,8 +127,6 @@ const Joystick = () => {
       newAngle = Math.PI;
     } else if (event.key === "ArrowRight") {
       newAngle = 0;
-    } else {
-      return;
     }
     setAngle(newAngle);
 
