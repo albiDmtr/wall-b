@@ -1,4 +1,4 @@
 # Wall-B
-An autonomous trashcan advertising the next Build It event on campus.
+An autonomous trashcan robot controlled by MCP.
 
-![image](./docs/diagram.png)
+![image](./docs/wallb.jpg)
